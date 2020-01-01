@@ -10,8 +10,6 @@ code_srv="http://firmware.wifimedia.com.vn/hardware_active"
 blacklist="http://firmware.wifimedia.com.vn/blacklist"
 # Defines the URL to check the firmware at
 url_fw="http://firmware.wifimedia.com.vn/tplink/$board_name.bin"
-url_v="http://firmware.wifimedia.com.vn/tplink/version"
-url_srv="http://firmware.wifimedia.com.vn/hardware"
 device=$(cat /sys/class/ieee80211/phy0/macaddress | sed 's/:/-/g' | tr a-z A-Z)
 apid=$(echo $device | sed 's/:/-/g')
 
