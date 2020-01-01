@@ -4,14 +4,5 @@ START=30
 STOP=105
 
 boot() {
-
-	while true; do
-    	ping -c1 -W1 8.8.8.8
-    	if [ ${?} -eq 0 ]; then
-      	  	break
-   	else
-        	sleep 1
-    	fi
-	done
 	/sbin/wifimedia/controller.sh license_srv >/dev/null 2>&1
 }
