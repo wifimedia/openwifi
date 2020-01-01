@@ -133,7 +133,7 @@ cat $response_file | while read line ; do
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0 eth1.1"
+			uci set network.wan.ifname="eth0.1 eth0.2"
 			uci set wireless.@wifi-iface[0].network="wan"
 			uci set wifimedia.@switchmode[0].switch_port="$value"
 			uci commit
@@ -143,12 +143,12 @@ cat $response_file | while read line ; do
 			uci set network.lan.ipaddr="172.16.99.1"
 			uci set network.lan.netmask="255.255.255.0"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"
+			uci set network.lan.ifname="eth0.1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0"
+			uci set network.wan.ifname="eth0.2"
 			uci set wireless.@wifi-iface[0].network="wan"
 			uci set wifimedia.@switchmode[0].switch_port="0"
 			uci commit			
@@ -160,11 +160,11 @@ cat $response_file | while read line ; do
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.ifname="eth0.1"		
 		else ##DHCP Client nhan IP
 			uci delete network.lan
 			uci set network.lan.proto="dhcp"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.ifname="eth0.1"		
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -182,21 +182,21 @@ cat $response_file | while read line ; do
 			uci set network.wan="interface"
 			uci set network.wan.proto="static"
 			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0.2"		
 		else ##DHCP Client nhan IP
 			uci delete network.wan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0.2"		
 		fi
-	elif [  "$key" = "network.lan.ip" ];then
-		uci set network.lan.ipaddr="$value"
-	elif [  "$key" = "network.lan.subnetmask" ];then
-		uci set network.lan.netmask="$value"
-	elif [  "$key" = "network.lan.gateway" ];then
-		uci set network.lan.gateway="$value"		
-	elif [  "$key" = "network.lan.dns" ];then
+	elif [  "$key" = "network.wan.ip" ];then
+		uci set network.wan.ipaddr="$value"
+	elif [  "$key" = "network.wan.subnetmask" ];then
+		uci set network.wan.netmask="$value"
+	elif [  "$key" = "network.wan.gateway" ];then
+		uci set network.wan.gateway="$value"		
+	elif [  "$key" = "network.wan.dns" ];then
 		value=$(echo $value | sed 's/,/ /g')
-		uci set network.lan.dns="$value"		
+		uci set network.wan.dns="$value"		
 	##Cau hinh DHCP
 	elif [  "$key" = "lan.dhcp.start" ];then
 		uci set dhcp.lan.start="$value"
@@ -219,7 +219,7 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "cpn.dhcpextenal" ];then
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 	elif [  "$key" = "cpn.clientdetect" ];then
-		uci set wifimedia.@nodogsplash[0].cpn="$value"
+		uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
 		echo $value >/tmp/clientdetect
 	#Cau hinh auto reboot
 	elif [  "$key" = "scheduletask.enable" ];then

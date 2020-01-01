@@ -139,20 +139,6 @@ captive_portal_restart(){
 
 heartbeat(){
 	captive_portal_restart
-	#ndsctl status > /tmp/ndsctl_status.txt
-	#MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
-	#UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
-	#NUM_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Client authentications since start' | cut -d':' -f2 | xargs)
-	#RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	#TOTAL_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Current clients' | cut -d':' -f2 | xargs)
-	#TOTAL_CLIENTS=$(ndsctl status | grep clients | awk '{print $3}')
-	#Value Jsion
-	#wget -q --timeout=3 \
-	#	 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
-	#	 -O /dev/null
-	#wget -q --timeout=3 \
-	#"http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}&total_clients=${TOTAL_CLIENTS}" \
-	# -O /dev/null
 }
 
 get_captive_portal_clients() {
@@ -272,7 +258,7 @@ dhcp_extension(){
 	uci commit && wifi up
 }
 cpn_detect(){
-	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpnurl`
+	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn_detect`
 	if [ $cpn_status -eq 0 ];then
 		echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
 	fi
