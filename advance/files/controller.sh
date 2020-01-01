@@ -155,7 +155,7 @@ cat $response_file | while read line ; do
 			uci set wifimedia.@switchmode[0].switch_port="0"
 			uci commit			
 		fi
-	#Cu hinh IP LAN/WAN
+	#Cu hinh IP LAN
 	elif [ "$key" = "network.lan.static" ];then
 		echo 1 >/tmp/network_flag
 		if [ "$value" = "1" ];then ##Static 
@@ -190,15 +190,15 @@ cat $response_file | while read line ; do
 			uci set network.wan.proto="dhcp"
 			uci set network.wan.ifname="eth0"		
 		fi
-	elif [  "$key" = "network.lan.ip" ];then
-		uci set network.lan.ipaddr="$value"
-	elif [  "$key" = "network.lan.subnetmask" ];then
-		uci set network.lan.netmask="$value"
-	elif [  "$key" = "network.lan.gateway" ];then
-		uci set network.lan.gateway="$value"		
-	elif [  "$key" = "network.lan.dns" ];then
+	elif [  "$key" = "network.wan.ip" ];then
+		uci set network.wan.ipaddr="$value"
+	elif [  "$key" = "network.wan.subnetmask" ];then
+		uci set network.wan.netmask="$value"
+	elif [  "$key" = "network.wan.gateway" ];then
+		uci set network.wan.gateway="$value"		
+	elif [  "$key" = "network.wan.dns" ];then
 		value=$(echo $value | sed 's/,/ /g')
-		uci set network.lan.dns="$value"		
+		uci set network.wan.dns="$value"		
 	##Cau hinh DHCP
 	elif [  "$key" = "lan.dhcp.start" ];then
 		uci set dhcp.lan.start="$value"
@@ -221,7 +221,7 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "cpn.dhcpextenal" ];then
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 	elif [  "$key" = "cpn.clientdetect" ];then
-		uci set wifimedia.@nodogsplash[0].cpn="$value"
+		uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
 		echo $value >/tmp/clientdetect
 	#Cau hinh auto reboot
 	elif [  "$key" = "scheduletask.enable" ];then

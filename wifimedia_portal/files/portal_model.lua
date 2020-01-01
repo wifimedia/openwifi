@@ -50,7 +50,7 @@ dhcpextension = s:taboption( "basic",Flag, "dhcpextension","DHCP Extension")
 dhcpextension.rmempty = false
 dhcpextension:depends({enable_cpn="1"})
 
-cpn = s:taboption( "basic",Flag, "cpn_clients","CPN Clients detect")
+cpn = s:taboption( "basic",Flag, "cpn_detect","CPN Clients detect")
 cpn.rmempty = false
 cpn:depends({enable_cpn="1"})
 --network:depends({enable_cpn="1"})
