@@ -310,10 +310,22 @@ monitor_port(){
 	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |head -4| while read line;do
 		echo "$line," >>/tmp/monitor_port
 	done
-	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
+	#ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
+	ports=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ link:/:/g'| sed 's/port:0://g'| sed 's/port:1://g'| sed 's/port:2://g'| sed 's/port:3://g'| sed 's/port:4://g' )
+	echo $ports >/tmp/ports
+	var1=`cat /tmp/ports`
+	var2='4 3 2 1'
+	set -- $var1
+	for j in $var2;do
+		echo "$j:$1" >>/tmp/tmp_port
+		shift
+	done
+	ports_data=$(cat /tmp/tmp_port|xargs )
 	echo $ports_data
 	rm /tmp/monitor_port
+    rm /tmp/tmp_port
 }
+
 _detect_clients(){ #Support Nextify
 	get_client_connect_wlan
 	_post_clients
