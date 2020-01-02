@@ -6,7 +6,7 @@ echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 _nds=/etc/cron_nds
 echo '* * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
 echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >>$_nds
-echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/nds && /etc/init.d/cron restart
+#echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/nds && /etc/init.d/cron restart
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
 MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
