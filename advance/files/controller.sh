@@ -256,6 +256,7 @@ fi
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	/etc/init.d/network restart
+	rm /tmp/network_flag
 	echo "upwifi"
 fi
 	
@@ -277,14 +278,28 @@ srv(){
 	get_client_connect_wlan
 	ip_public
 	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$_device" -O $response_file
-	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
-		start_cfg
-	fi
-	uci set wifimedia.@hash256[0].value=$hash256
+
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
 	#echo "mac_clients "$client_connect_wlan
 	#echo "ports_data "$ports_data
+	curl_result=$?
+	curl_data=$(cat $response_file)
+	if [ "$curl_result" -eq "0" ]; then
+		echo "Checked in to the dashboard successfully,"
+	
+		if grep -q "." $response_file; then
+			echo "we have new settings to apply!"
+		else
+			echo "we will maintain the existing settings."
+			exit
+		fi	
+	else
+		logger "WARNING: Could not checkin to the dashboard."
+		echo "WARNING: Could not checkin to the dashboard."
+		exit
+	fi
+	start_cfg	
 }
 token(){
 	#token = sha256(mac+secret)
