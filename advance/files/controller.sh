@@ -259,14 +259,14 @@ fi
 	
 }
 
-_nds(){
+_nds(){ #Status Captive Portal
 	nodogsplash=`pidof nodogsplash`
 	if [ -z $nodogsplash ];then
-		_cpn="on"
+		_cpn="off"
 		echo $_cpn
 		
 	else
-		_cpn="off"
+		_cpn="on"
 		echo $_cpn
 	fi
 }
@@ -287,7 +287,7 @@ device_cfg(){
 	get_client_connect_wlan
 	ip_public
 	_nds
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${nodogsplash}" "$link_config$_device" -O $response_file
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}" "$link_config$_device" -O $response_file
 
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
