@@ -9,53 +9,113 @@ ip_public(){
 	echo $PUBLIC_IP
 }
 
-wr940v5() { #checking internet
+wr840v4() { #checking internet
 
 	#check gateway
 	ping -c 3 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wps/
+		echo timer > trigger
 	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wps/
+		echo none > trigger
+	fi
+
+	#checking internet
+	ping -c 10 "8.8.8.8" > /dev/null
+	if [ $? -eq "0" ];then
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wan/
+		echo timer > trigger
+	else
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wan/
+		echo none > trigger
+	fi
+}
+
+wr840v620() { #checking internet
+
+	#checking internet
+	ping -c 10 "8.8.8.8" > /dev/null
+	if [ $? -eq "0" ];then
+		echo none >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wan/trigger
+		echo timer >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wlan/trigger
+		echo timer >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wan/trigger
+		echo 650 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wlan/delay_on
+		echo 450 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wan/delay_on
+	else
+		echo none >/sys/devices/platform/leds/leds/tl-wr840n-v6:orange\:wan/trigger
+		echo 0 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wan/brightness
+	fi
+	
+	#check gateway
+	ping -c 3 "$gateway" > /dev/null
+	if [ $? -eq "0" ];then
+		echo timer >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:lan/trigger
+	else
+		echo none >/sys/devices/platform/leds/leds/tl-wr840n-v6:orange\:wan/trigger
+		echo none >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wlan/trigger
+		echo 1 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:lan/brightness
+		echo 1 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wlan/brightness
+	fi
+}
+
+wr841v14() { #checking internet
+
+	#checking internet
+	ping -c 10 "8.8.8.8" > /dev/null
+	if [ $? -eq "0" ];then
+		echo timer >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:wan/trigger
+		echo none >/sys/devices/platform/leds/leds/tl-wr841n-v14:orange:wan/trigger
+	else
+		echo none >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:wan/trigger
+		echo timer >/sys/devices/platform/leds/leds/tl-wr841n-v14:orange:wan/trigger
+	fi
+	#check gateway
+	ping -c 3 "$gateway" > /dev/null
+	if [ $? -eq "0" ];then
+		echo 1 >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:wlan/brightness
+		echo timer >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:lan/trigger
+	else
+		echo 500 >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:lan/delay_on
+		echo 0 >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:lan/delay_off
+		#echo none >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:lan/trigger
+		#echo 1 >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:lan/brightness		
+	fi	
+}
+
+wr840v13() { #checking internet
+
+	#check gateway
+	ping -c 3 "$gateway" > /dev/null
+	if [ $? -eq "0" ];then
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wps/
+		echo timer > trigger
+	else
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wps/
+		echo none > trigger
 	fi
 	
 	#checking internet
 	ping -c 10 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wan/
+		echo timer > trigger
 	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
-	fi
-
-}
-
-wr940v6() { #checking internet
-
-	#check gateway
-	ping -c 3 "$gateway" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
-		echo 1 >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/brightness
-	fi
-	
-	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
+		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wan/
+		echo none > trigger
 	fi
 }
-
-#ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`#
 
 checking (){
 	model=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
-	if [ "$model" == "TL-WR940N_v6" ];then
-		wr940v6
-	fi	
+
+	if [ "$model" == "TL-WR840N_v6" ];then	
+		wr840v620
+	elif [ "$model" == "TL-WR841N_v14" ];then	
+		wr841v14		
+	fi
+	#asus56u
+	#Clear memory
 	if [ "$(cat /proc/meminfo | grep 'MemFree:' | awk '{print $2}')" -lt 5000 ]; then
 		echo "Clear Cach"
 		free && sync && echo 3 > /proc/sys/vm/drop_caches && free
@@ -64,6 +124,7 @@ checking (){
 	#pidhostapd=`pidof hostapd`
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
+
 start_cfg(){
 
 touch /tmp/reboot_flag
