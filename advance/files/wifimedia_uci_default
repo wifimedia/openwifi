@@ -159,6 +159,9 @@ echo -e "wifimedia:x:0:0:wifimedia:/root:/bin/ash" >>/etc/passwd
 echo -e "wifimedia:*:0:0:99999:7:::" >>/etc/shadow
 echo -e "09465670089\n09465670089" | passwd wifimedia
 
+echo -e "heartbeat:x:1000:1000:heartbeat:/root:/bin/false" >>/etc/passwd
+echo -e "heartbeat:*:0:0:99999:7:::" >>/etc/shadow
+
 #Change password for root
 word=$(cat /sys/class/ieee80211/phy0/macaddress | cut -c  10,11,13,14,16,17 | sed 's/://g' |awk '{print $1}'|tr a-z A-Z)
 pwd=$(echo -n $word | md5sum | awk '{print $1}')
@@ -168,7 +171,7 @@ echo -e "wifimedia\nwifimedia" | passwd root
 
 #Cron heartbeat
 echo '* * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root  #monitor
-
+echo '* * * * * /sbin/wifimedia/controller.sh checking' >/etc/crontabs/heartbeat  #monitor
 #Info
 CODENAME="wifimedia"
 if [ -f "/etc/codename" ]; then
