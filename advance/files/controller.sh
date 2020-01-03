@@ -192,7 +192,7 @@ cat $response_file | while read line ; do
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0 eth1.1"
+			uci set network.wan.ifname="eth0.1 eth0.2"
 			uci set wireless.@wifi-iface[0].network="wan"
 			uci set wifimedia.@switchmode[0].switch_port="$value"
 			uci commit
@@ -202,7 +202,7 @@ cat $response_file | while read line ; do
 			uci set network.lan.ipaddr="172.16.99.1"
 			uci set network.lan.netmask="255.255.255.0"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"
+			uci set network.lan.ifname="eth0.1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
@@ -219,11 +219,11 @@ cat $response_file | while read line ; do
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.ifname="eth0.1"		
 		else ##DHCP Client nhan IP
 			uci delete network.lan
 			uci set network.lan.proto="dhcp"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.ifname="eth0.1"		
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -241,11 +241,11 @@ cat $response_file | while read line ; do
 			uci set network.wan="interface"
 			uci set network.wan.proto="static"
 			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth0"		
+			uci set network.wan.ifname="eth0.2"		
 		else ##DHCP Client nhan IP
 			uci delete network.wan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0"		
+			uci set network.wan.ifname="eth0.2"		
 		fi
 	elif [  "$key" = "network.wan.ip" ];then
 		uci set network.wan.ipaddr="$value"
@@ -508,7 +508,6 @@ license_local() {
 	if [ "$uptime" -gt 15 ]; then #>15days
 		if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 			uci set wireless.radio0.disabled="0"
-			uci set wireless.radio1.disabled="0"
 			uci commit wireless
 			wifi
 			echo "Activated" >/etc/opt/license/status
@@ -519,7 +518,6 @@ license_local() {
 			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
 			echo "Not Activated" >/etc/opt/license/status
 			uci set wireless.radio0.disabled="1"
-			uci set wireless.radio1.disabled="1"
 			uci commit wireless
 			wifi down
 		fi
