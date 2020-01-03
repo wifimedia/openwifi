@@ -271,13 +271,25 @@ _boot(){
 _lic(){
 	license_srv
 }
+_nds(){ #Status Captive Portal
+	nodogsplash=`pidof nodogsplash`
+	if [ -z $nodogsplash ];then
+		_cpn="off"
+		echo $_cpn
+		
+	else
+		_cpn="on"
+		echo $_cpn
+	fi
+}
 
 srv(){
 	token
 	monitor_port
 	get_client_connect_wlan
 	ip_public
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$_device" -O $response_file
+	_nds
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}" "$link_config$_device" -O $response_file
 
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
