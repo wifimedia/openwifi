@@ -5,6 +5,5 @@ STOP=12
 
 boot() {
 	/etc/init.d/network restart
-	wifi up
 	/sbin/wifimedia/controller.sh _boot
 }
