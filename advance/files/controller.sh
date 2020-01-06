@@ -287,6 +287,8 @@ cat $response_file | while read line ; do
 		uci set scheduled.@times[0].hour="$value"
 	elif [  "$key" = "scheduletask.minute" ];then
 		uci set scheduled.@times[0].minute="$value"
+	elif [  "$key" = "action.port" ];then
+		echo "$value" >/etc/config/port	
 	fi
 ##
 done	
@@ -379,7 +381,7 @@ token(){
 }
 
 monitor_port(){
-	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |tail -4|head -5| while read line;do
+	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |tail -6|head -4| while read line;do
 		echo "$line," >>/tmp/monitor_port
 	done
 	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
@@ -395,6 +397,7 @@ monitor_port(){
 	#ports_data=$(cat /tmp/tmp_port|xargs )
 	echo $ports_data
 	rm /tmp/monitor_port
+	disable_port
     #rm /tmp/tmp_port
 }
 
@@ -464,6 +467,15 @@ action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 			fi
 		done	
 	fi
+}
+
+disable_port(){
+	action_port='/etc/config/port'
+	for i in $(cat $action_port); do
+		swconfig dev switch0 port $i set disable 1
+		#echo $i
+	done
+	swconfig dev switch0 set apply
 }
 
 license_srv() {
