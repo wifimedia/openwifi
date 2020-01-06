@@ -288,7 +288,7 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "scheduletask.minute" ];then
 		uci set scheduled.@times[0].minute="$value"
 	elif [  "$key" = "action.port" ];then
-		echo "$value" >/etc/config/port	
+		echo "$value" >/tmp/ports	
 	fi
 ##
 done	
@@ -470,7 +470,7 @@ action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 }
 
 disable_port(){
-	action_port='/etc/config/port'
+	action_port='/tmp/ports'
 	for i in $(cat $action_port); do
 		swconfig dev switch0 port $i set disable 1
 		#echo $i
