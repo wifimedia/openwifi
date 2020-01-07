@@ -1,0 +1,42 @@
+config dhcpsnooping ebtables
+        option enabled          'on'
+
+        # Where to insert ebtables rules
+        option offsetPrerouting '0'
+        option offsetForward    '0'
+
+        # Name of chain in which to store good host MACs
+        option roamChain      'dhcpsnooping'
+
+        # Access/roaming untrusted interface names start with these
+        list roamPattern      'wl'
+        list roamPattern      'wi'
+
+        # What interfaces are bridge ports
+        option bridgePattern    'br'
+
+        # Subnet of control plane and port for UDP broadcasts
+        option broadcastAddr    '127.0.0.1/8'
+        option broadcastPort    '1000'
+
+        # MAC addresses never allowed on access ports
+        # DHCP responses will *only* be allowed from these addresses,
+        # so at least one host or relay should be listed.
+        #list protectMAC         '00:11:22:33:44:55'
+        #list protectMAC         '00:11:22:33:44:56'
+
+        # For ebtables-dhcpsnooping-mysql-ap package only
+        # option mysqlConfFile    '/etc/dhcpsnoopingd.my.cnf'
+
+        # For ebtables-dhcpsnooping-pgsql-ap package only
+        option pgsqlConfFile    '/etc/dhcpsnoopingd.pg.cnf'
+        option pgsqlConfName    'dhcpsnooping'
+
+        # Possible debug flags.  Mix as needed.
+        #list debug              'general'
+        #list debug              'udp'
+        #list debug              'nflog'
+        #list debug              'neigh'
+        #list debug              'dhcp'
+        #list debug              'all'
+        #list debug              'verbose'

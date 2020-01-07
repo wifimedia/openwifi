@@ -1,0 +1,22 @@
+# Read by dhcpsnoopingd via mysqlConfFile option in /etc/config/dhcpsnooping
+# TLS unfortunately not yet supported, sorry.
+[client]
+port            = 3306
+socket          = /var/run/dhcpsnooping.my.sock
+user            = dhcpsnooping
+database        = dhcpsnooping
+# Change this to the host running the database server
+host            = 127.0.0.1
+# Change this to the password of the user on the database server
+password        = changethiseverywhere
+
+# Database setup for server:
+# CREATE DATABASE dhcpsnooping;
+# use dhcpsnooping;
+# CREATE TABLE leases ( bridge varchar(32), mac varchar(17), ip varchar(15), validUntil int(11), UNIQUE (bridge, mac, ip) );
+# use mysql;
+# change the ip/netmask to a subnet containing this and other AP (control plane):
+# CREATE USER 'dhcpsnooping'@'XX.XX.XX.XX/255.255.XX.XX';
+# UPDATE user SET Password=PASSWORD('changethiseverywhere') WHERE USER='dhcpsnooping';
+# GRANT SELECT, INSERT, UPDATE, DELETE ON dhcpsnooping.leases TO 'dhcpsnooping'@'XX.XX.XX.XX/255.255.XX.XX';
+# FLUSH PRIVILEGES;

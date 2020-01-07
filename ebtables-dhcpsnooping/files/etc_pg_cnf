@@ -1,0 +1,33 @@
+# Read by dhcpsnoopingd via pgsqlConfFile/pgsqlConfName option in /etc/config/dhcpsnooping
+[dhcpsnooping]
+dbname=dhcpsnooping
+hostaddr=127.0.0.1
+port=5432
+user=dhcpsnooping
+password=changethiseverywhere
+# Unfortunately SSL is not compiled in
+# sslmode=require
+
+# Database setup for server.  Server must be v9.5+:
+# su <postgres superuser>
+# createdb dhcpsnooping
+# psql
+# CREATE USER dhcpsnooping PASSWORD 'notapassword';
+# \c dhcpsnooping
+# CREATE SCHEMA dhcpsnooping;
+# SET search_path TO dhcpsnooping;
+# CREATE TABLE dhcpsnooping.leases ( bridge varchar(32), mac varchar(17), ip varchar(15), validUntil timestamp, UNIQUE(bridge, mac, ip));
+# GRANT SELECT, INSERT, UPDATE, DELETE ON leases TO dhcpsnooping;
+# GRANT USAGE ON SCHEMA dhcpsnooping TO dhcpsnooping;
+# GRANT connect ON DATABASE dhcpsnooping TO dhcpsnooping;
+# REVOKE connect ON DATABASE dhcpsnooping FROM PUBLIC;
+# ALTER ROLE dhcpsnooping SET search_path TO dhcpsnooping;
+# add this line to pg_hba.conf, subsitituting your control plane network
+# host    dhcpsnooping    dhcpsnooping    127.0.0.1/8           md5
+# Add your control plane network to listen_addresses in postgresql.conf
+# restart postgresql daemon
+# psql -d dhcpsnooping -h 127.0.0.1 -U dhcpsnooping
+# change password to 'changethiseverywhere' (which you should change, everywhere)
+# using the command:
+# \password
+

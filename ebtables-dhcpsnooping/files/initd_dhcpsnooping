@@ -1,0 +1,152 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2011 OpenWrt.org
+
+START=30
+USE_PROCD=1
+PROG=/usr/sbin/dhcpsnoopingd
+
+del_prerouting_rule() {
+        ebtables -t nat -D PREROUTING --logical-in ${2}+ --proto arp --arp-op Request -d multicast -j ${1}
+}
+
+add_prerouting_chain() {
+	ebtables -t nat -N ${2} -P RETURN || true
+	ebtables -t nat -F ${2}
+        ebtables -t nat -D PREROUTING --logical-in ${3}+ --proto arp --arp-op Request -d multicast -j ${2}
+        ebtables -t nat -I PREROUTING ${1} --logical-in ${3}+ --proto arp --arp-op Request -d multicast -j ${2}
+}
+
+add_forward_chain() {
+        ebtables -N ${2} -P DROP || true
+	ebtables -F ${2}
+        ebtables -A ${2} --proto ipv4 --ip-src 0.0.0.0 -j RETURN
+        ebtables -A ${2} --proto arp --arp-ip-src 0.0.0.0 -j RETURN
+}
+
+del_forward_rules() {
+        ebtables -D FORWARD -o ${2}+ --logical-in ${3}+ --proto arp -d multicast -j DROP
+        ebtables -D FORWARD -i ${2}+ --logical-in ${3}+ --proto ipv4 -j ${1}
+        ebtables -D FORWARD -i ${2}+ --logical-in ${3}+ --proto arp -j ${1}
+        ebtables -D FORWARD -i ${2}+ --logical-in ${3}+ --proto ipv4 --ip-protocol udp --ip-source-port 68 --ip-destination-port 67 --nflog-group 1 -j ACCEPT
+}
+
+add_forward_rules() {
+        ebtables -I FORWARD ${1} -o ${3}+ --logical-in ${4}+ --proto arp -d multicast -j DROP
+        ebtables -I FORWARD ${1} -i ${3}+ --logical-in ${4}+ --proto ipv4 -j ${2}
+        ebtables -I FORWARD ${1} -i ${3}+ --logical-in ${4}+ --proto arp -j ${2}
+        ebtables -I FORWARD ${1} -i ${3}+ --logical-in ${4}+ --proto ipv4 --ip-protocol udp --ip-source-port 68 --ip-destination-port 67 --nflog-group 1 -j ACCEPT
+}
+
+del_dhcp_server_permit_rule() {
+        ebtables -D FORWARD -s ${1} --logical-in ${2}+ --proto ipv4 --ip-protocol udp --ip-source-port 67 --ip-destination-port 68 --nflog-group 1 -j ACCEPT
+}
+
+add_dhcp_server_permit_rule() {
+        ebtables -I FORWARD ${1} -s ${2} --logical-in ${3}+ --proto ipv4 --ip-protocol udp --ip-source-port 67 --ip-destination-port 68 --nflog-group 1 -j ACCEPT
+}
+
+del_last_forward_rule() {
+        ebtables -D FORWARD --logical-in ${1}+ --proto ipv4 --ip-protocol udp --ip-source-port 67 --ip-destination-port 68 -j DROP
+}
+
+add_last_forward_rule() {
+        ebtables -I FORWARD ${1} --logical-in ${2}+ --proto ipv4 --ip-protocol udp --ip-source-port 67 --ip-destination-port 68 -j DROP
+}
+
+del_protected_mac_rule() {
+        ebtables -D FORWARD -i ${1}+ --logical-in ${2}+ -s ${3} -j DROP
+}
+
+add_protected_mac_rule() {
+        ebtables -I FORWARD ${1} -i ${2}+ --logical-in ${3}+ -s ${4} -j DROP
+}
+
+validate_dhcpsnooping_section() {
+	uci_validate_section dhcpsnooping dhcpsnooping "${1}" \
+		'enabled:bool:1' 'protectMAC:list(string)' 'broadcastPort:port' \
+                'broadcastAddr:cidr4' 'roamPattern:list(string)' 'bridgePattern:string' \
+                'offsetPrerouting:string' 'offsetForward:string' 'roamChain:string' \
+                'mysqlConfFile:string' 'pgsqlConfFile:string' 'pgsqlConfName:string' \
+                'debug:list(string)'
+}
+
+start_service() {
+	local enabled protectMAC broadcastPort broadcastAddr
+
+	validate_dhcpsnooping_section ebtables || {
+		echo "validation failed"
+		return 1
+	}
+
+	[ $enabled = 0 ] && return
+
+	debugs=''
+	for d in $debug; do
+		if [ "x$d" = "xgeneral" ]; then
+			debugs="$debugs --debug"
+		elif [ "x$d" = "xverbose" ]; then
+			debugs="$debugs --verbose"
+		else
+			debugs="$debugs --debug-$d"
+		fi
+	done
+
+	roams=''
+	for r in $roamPattern; do
+		roams="$roams --roamifprefix=$r"
+	done
+
+	if [ -n "$pgsqlConfFile" ] ; then
+		db="--pgsql-config-file=$pgsqlConfFile --pgsql-config-name=$pgsqlConfName"
+	fi
+	if [ -n "$mysqlConfFile" ] ; then
+		db="--mysql-config-file=$mysqlConfFile"
+        fi
+
+	procd_open_instance
+	procd_set_param command "$PROG" $debugs --broadcast-port=$broadcastPort --broadcast-addr=$broadcastAddr $db $roams
+
+	add_prerouting_chain $offsetPrerouting $roamChain $bridgePattern
+	for mac in $protectMAC; do
+		for pat in $roamPattern; do 
+			add_protected_mac_rule $offsetForward $pat $bridgePattern $mac
+		done
+	done
+        add_forward_chain $offsetForward $roamChain
+	for pat in $roamPattern; do 
+		del_forward_rules $roamChain $pat $bridgePattern
+		add_forward_rules $offsetForward $roamChain $pat $bridgePattern
+	done
+	for mac in $protectMAC; do
+		del_dhcp_server_permit_rule $mac $bridgePattern
+		add_dhcp_server_permit_rule $offsetForward $mac $bridgePattern
+	done
+        del_last_forward_rule $bridgePattern
+        add_last_forward_rule $offsetForward $bridgePattern
+	procd_set_param respawn
+	procd_close_instance
+}
+
+stop_service() {
+	local enabled protectMAC broadcastPort broadcastAddr
+
+	validate_dhcpsnooping_section ebtables || {
+		echo "validation failed"
+		return 1
+	}
+
+	del_prerouting_rule $roamChain $bridgePattern
+	for mac in $protectMAC; do
+		for pat in $roamPattern; do 
+			del_protected_mac_rule $pat $bridgePattern $mac
+		done
+	done
+	for pat in $roamPattern; do 
+		del_forward_rules $roamChain $pat $bridgePattern
+	done
+	del_last_forward_rule $bridgePattern
+	for mac in $protectMAC; do
+		del_dhcp_server_permit_rule $mac $bridgePattern
+	done
+}
+
