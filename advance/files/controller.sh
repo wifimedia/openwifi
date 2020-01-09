@@ -105,7 +105,7 @@ wr840v13() { #checking internet
 checking (){
 	model=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
 
-	if [ "$model" == "TL-WR840N_v6" ];then	
+	if [ "$model" == "TL-WR840N_v6" ] || [ "$model" == "TL-TL-WR840N_v6.20" ];then	
 		wr840v620
 	elif [ "$model" == "TL-WR841N_v14" ];then	
 		wr841v14		
