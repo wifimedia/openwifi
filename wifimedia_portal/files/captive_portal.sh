@@ -72,13 +72,13 @@ config_captive_portal() {
 		done
 
 		###Read line file 
-		uci del nodogsplash.@nodogsplash[0].users_to_router
-		uci del nodogsplash.@nodogsplash[0].authenticated_users
-		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
-		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
+		uci del nodogsplash.@nodogsplash[0].users_to_router >/dev/null 2>&1
+		uci del nodogsplash.@nodogsplash[0].authenticated_users >/dev/null 2>&1
+		uci del nodogsplash.@nodogsplash[0].preauthenticated_users >/dev/null 2>&1
+		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all" >/dev/null 2>&1
 		uci commit
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw"
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
 		if network_get_ipaddr addr "wan"; then
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
 		fi			
@@ -223,19 +223,20 @@ write_login(){
 dhcp_extension(){
 	relay=`uci -q get network.local`
 	uci del network.local.network
+	uci set network.local="interface"
 	if [ $relay != "" ];then
 		if [ $NET_ID = "br-hotspot" ];then
-			uci set network.local.ipaddr='$ip_hotspot_gw'
+			uci set network.local.ipaddr=$ip_hotspot_gw
 			uci add_list network.local.network='hotspot'
 			uci set dhcp.hotspot.ignore='1'
 			uci set wireless.default_radio0.network='hotspot'
-			uci set wireless.default_radio1.network='hotspot'
+			#uci set wireless.default_radio1.network='hotspot'
 		else
-			uci set network.local.ipaddr='$ip_lan_gw'
+			uci set network.local.ipaddr=$ip_lan_gw
 			uci add_list network.local.network='lan'
 			uci set dhcp.lan.ignore='1'
 			uci set wireless.default_radio0.network='lan'
-			uci set wireless.default_radio1.network='lan'
+			#uci set wireless.default_radio1.network='lan'
 		fi	
 		uci add_list network.local.network='wan'
 	else
