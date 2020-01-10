@@ -209,6 +209,7 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "cpn.enable" ];then
 		echo $value >/tmp/cpn_flag
 		uci set nodogsplash.@nodogsplash[0].enabled="$value"
+		uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
 	elif [  "$key" = "cpn.domain" ];then
 		uci set wifimedia.@nodogsplash[0].domain="$value"
 	elif [  "$key" = "cpn.walledgarden" ];then
