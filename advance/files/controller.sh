@@ -189,13 +189,12 @@ cat $response_file | while read line ; do
 	##Cau hinh switch 5 port		
 	elif [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
+		uci set wireless.@wifi-iface[0].network="wan"
+		uci set wifimedia.@switchmode[0].switch_port="$value"		
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
 			uci set network.wan.ifname="eth0.1 eth0.2"
-			uci set wireless.@wifi-iface[0].network="wan"
-			uci set wifimedia.@switchmode[0].switch_port="$value"
-			uci commit
 		else
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
@@ -207,10 +206,7 @@ cat $response_file | while read line ; do
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0"
-			uci set wireless.@wifi-iface[0].network="wan"
-			uci set wifimedia.@switchmode[0].switch_port="0"
-			uci commit			
+			uci set network.wan.ifname="eth0.2"			
 		fi
 	#Cu hinh IP LAN
 	elif [ "$key" = "network.lan.static" ];then
