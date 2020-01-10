@@ -77,8 +77,8 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
 		uci commit
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw"
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
 		if network_get_ipaddr addr "wan"; then
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
 		fi			
