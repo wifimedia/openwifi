@@ -158,15 +158,14 @@ cat $response_file | while read line ; do
 	#Cu hinh IP LAN
 	elif [ "$key" = "network.lan.static" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.lan >/dev/null 2>&1
+		uci set network.lan="interface"
+		uci set network.lan.type="bridge"	
+		uci set network.lan.ifname="eth1.1"
 		if [ "$value" = "1" ];then ##Static 
-			uci set network.lan="interface"
-			uci set network.lan.proto="static"
-			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.proto="static"	
 		else ##DHCP Client nhan IP
-			uci delete network.lan
-			uci set network.lan.proto="dhcp"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.proto="dhcp"	
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -180,15 +179,14 @@ cat $response_file | while read line ; do
 	###WAN config
 	elif [ "$key" = "network.wan.static" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.wan >/dev/null 2>&1
+		uci set network.wan="interface"
+		uci set network.wan.type="bridge"	
+		uci set network.wan.ifname="eth0"				
 		if [ "$value" = "1" ];then ##Static 
-			uci set network.wan="interface"
 			uci set network.wan.proto="static"
-			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth0"		
 		else ##DHCP Client nhan IP
-			uci delete network.wan
-			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0"		
+			uci set network.wan.proto="dhcp"	
 		fi
 	elif [  "$key" = "network.wan.ip" ];then
 		uci set network.wan.ipaddr="$value"
