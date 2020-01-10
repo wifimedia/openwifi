@@ -97,7 +97,6 @@ config_captive_portal() {
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"	
-
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 22"
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow udp port 53"
@@ -106,7 +105,6 @@ config_captive_portal() {
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 443"	
 		uci commit nodogsplash
 		rm -f $PREAUTHENTICATED_ADDRS $PREAUTHENTICATED_ADDR_FB
-
 		dhcp_extension
 		wifi
 		/etc/init.d/nodogsplash stop
