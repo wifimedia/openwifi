@@ -72,10 +72,10 @@ config_captive_portal() {
 		done
 
 		###Read line file 
-		uci del nodogsplash.@nodogsplash[0].users_to_router
-		uci del nodogsplash.@nodogsplash[0].authenticated_users
-		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
-		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
+		uci del nodogsplash.@nodogsplash[0].users_to_router >/dev/null 2>&1
+		uci del nodogsplash.@nodogsplash[0].authenticated_users >/dev/null 2>&1
+		uci del nodogsplash.@nodogsplash[0].preauthenticated_users >/dev/null 2>&1
+		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all" >/dev/null 2>&1
 		uci commit
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
