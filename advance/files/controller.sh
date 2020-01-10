@@ -232,10 +232,6 @@ cat $response_file | while read line ; do
 ##
 done	
 uci commit
-if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
-	echo "restarting the node"
-	reboot
-fi
 
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start CPN" 
@@ -257,7 +253,11 @@ if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	rm /tmp/network_flag
 	echo "upwifi"
 fi
-	
+
+if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
+	echo "restarting the node"
+	 sleep 5 && reboot
+fi	
 }
 
 _boot(){
