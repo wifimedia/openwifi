@@ -6,6 +6,7 @@ PREAUTHENTICATED_ADDRS=/tmp/preauthenticated_addrs
 PREAUTHENTICATED_ADDR_FB=/tmp/preauthenticated_addr_fb
 PREAUTHENTICATED_RULES=/tmp/preauthenticated_rules
 NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
+networkncpn=${NET_ID:br-lan}
 walledgadent=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users | sed 's/,/ /g'`
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
@@ -40,7 +41,7 @@ config_captive_portal() {
 	else	
 
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
-		uci set nodogsplash.@nodogsplash[0].gatewayinterface="${NET_ID}";
+		uci set nodogsplash.@nodogsplash[0].gatewayinterface="$networkncpn";
 		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
 		#uci set nodogsplash.@nodogsplash[0].redirecturl="$redirecturl_default";
 		uci set nodogsplash.@nodogsplash[0].maxclients="$maxclients_default";
