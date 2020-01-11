@@ -31,6 +31,7 @@ nds_status=`uci -q get nodogsplash.@nodogsplash[0].enabled`
 heartbeat_url=`uci -q get wifimedia.@nodogsplash[0].heartbeat`
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 ip_hotspot_gw=$(ifconfig br-hotspot | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+inf=`uci -q get network.lan`
 source /lib/functions/network.sh
 config_captive_portal() {
 	if [ $nds_status -eq 0 ];then
