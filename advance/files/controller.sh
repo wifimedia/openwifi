@@ -274,7 +274,7 @@ _lic(){
 	license_srv
 }
 
-device_cfg(){
+srv(){
 	token
 	monitor_port
 	get_client_connect_wlan
