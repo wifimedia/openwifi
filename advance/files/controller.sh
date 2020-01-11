@@ -138,6 +138,7 @@ cat $response_file | while read line ; do
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
 			uci set network.wan.ifname="eth0 eth1.1"
+			uci set wifimedia.@nodogsplash[0].network="br-hotspot"
 		else
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
@@ -149,7 +150,7 @@ cat $response_file | while read line ; do
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0"		
+			uci set network.wan.ifname="eth0"
 		fi
 	#Cu hinh IP LAN
 	elif [ "$key" = "network.lan.static" ];then
