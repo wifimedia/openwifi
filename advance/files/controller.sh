@@ -130,15 +130,13 @@ cat $response_file | while read line ; do
 	##Cau hinh switch 5 port		
 	elif [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.lan
+		uci set network.lan="interface"
+		uci set wireless.@wifi-iface[0].network="wan"
+		uci set wifimedia.@switchmode[0].switch_port="$value"		
 		if [ "$value" = "1" ];then
-			uci delete network.lan
-			uci set network.wan.proto="dhcp"
 			uci set network.wan.ifname="eth0.1 eth0.2"
-			uci set wireless.@wifi-iface[0].network="wan"
-			uci set wifimedia.@switchmode[0].switch_port="$value"
-			uci commit
 		else
-			uci set network.lan="interface"
 			uci set network.lan.proto="static"
 			uci set network.lan.ipaddr="172.16.99.1"
 			uci set network.lan.netmask="255.255.255.0"
@@ -148,23 +146,19 @@ cat $response_file | while read line ; do
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci delete dhcp.lan.dhcp_option
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0.2"
-			uci set wireless.@wifi-iface[0].network="wan"
-			uci set wifimedia.@switchmode[0].switch_port="0"
-			uci commit			
+			uci set network.wan.ifname="eth0.2"		
 		fi
 	#Cu hinh IP LAN/WAN
 	elif [ "$key" = "network.lan.static" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.lan
+		uci set network.lan="interface"	
+		uci set network.lan.type="bridge"
+		uci set network.lan.ifname="eth0.1"			
 		if [ "$value" = "1" ];then ##Static 
-			uci set network.lan="interface"
 			uci set network.lan.proto="static"
-			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth0.1"		
 		else ##DHCP Client nhan IP
-			uci delete network.lan
-			uci set network.lan.proto="dhcp"
-			uci set network.lan.ifname="eth0.1"		
+			uci set network.lan.proto="dhcp"	
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -178,15 +172,14 @@ cat $response_file | while read line ; do
 	###WAN config
 	elif [ "$key" = "network.wan.static" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.wan
+		uci set network.wan="interface"
+		uci set network.wan.type="bridge"
+		uci set network.wan.ifname="eth0.2"			
 		if [ "$value" = "1" ];then ##Static 
-			uci set network.wan="interface"
 			uci set network.wan.proto="static"
-			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth0.2"		
 		else ##DHCP Client nhan IP
-			uci delete network.wan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0.2"		
 		fi
 	elif [  "$key" = "network.wan.ip" ];then
 		uci set network.wan.ipaddr="$value"

@@ -229,13 +229,13 @@ dhcp_extension(){
 	uci del network.local.network
 	if [ $relay != "" ];then
 		if [ $NET_ID = "br-hotspot" ];then
-			uci set network.local.ipaddr='$ip_hotspot_gw'
+			uci set network.local.ipaddr=$ip_hotspot_gw
 			uci add_list network.local.network='hotspot'
 			uci set dhcp.hotspot.ignore='1'
 			uci set wireless.default_radio0.network='hotspot'
 			uci set wireless.default_radio1.network='hotspot'
 		else
-			uci set network.local.ipaddr='$ip_lan_gw'
+			uci set network.local.ipaddr=$ip_lan_gw
 			uci add_list network.local.network='lan'
 			uci set dhcp.lan.ignore='1'
 			uci set wireless.default_radio0.network='lan'
