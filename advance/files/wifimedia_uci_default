@@ -160,25 +160,7 @@ if [ "$model_hardware" == "TL-WR840N_v6" ] || [ "$model_hardware" == "TL-WR841N_
 	EOF
 fi
 
-if [ "$model_hardware" == "TL-WR840N_v4" ];then
-	echo "TL-WR840N v4" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR741ND_v4" ];then
-	echo "TL-WR740N v4" >/etc/hardware		
-elif [ "$model_hardware" == "TL-WA901ND_v3" ];then
-	echo "TL-WA901ND v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v13" ];then
-	echo "TL-WR841N v13" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v4" ];then
-	echo "TL-WR940N v5" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v6" ];then
-	echo "TL-WR940N v6.1" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
-	echo "TL-WR940N v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR840N_v5" ];then
-	echo "TL-WR840N v5" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v14" ];then
-	echo "TL-WR840N v6" >/etc/hardware
-elif [ "$model_hardware" == "CF-E355AC_v2" ];then
+if [ "$model_hardware" == "CF-E355AC_v2" ];then
 	echo "EAP35AC v2" >/etc/hardware
 	uci set meshdesk.settings.id_if="eth1"
 	uci commit meshdesk
@@ -292,7 +274,7 @@ echo -e "wifimedia\nwifimedia" | passwd root
 
 #Cron heartbeat
 #echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/tmp/wifimedia_cronjob #For Nextify
-echo '*/2 * * * * /sbin/wifimedia/controller.sh device_cfg' >/tmp/wifimedia_cronjob #Monitor
+echo '* * * * * /sbin/wifimedia/controller.sh srv' >/tmp/wifimedia_cronjob #Monitor
 crontab /tmp/wifimedia_cronjob -u root
 #Info
 CODENAME="wifimedia"
