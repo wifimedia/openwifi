@@ -136,6 +136,7 @@ cat $response_file | while read line ; do
 		uci set wifimedia.@switchmode[0].switch_port="$value"		
 		if [ "$value" = "1" ];then
 			uci set network.wan.ifname="eth0.1 eth0.2"
+			uci set wifimedia.@nodogsplash[0].network="br-hotspot"
 		else
 			uci set network.lan.proto="static"
 			uci set network.lan.ipaddr="172.16.99.1"
