@@ -26,8 +26,8 @@ service = s:taboption( "basic",Flag, "enable_cpn","Captive Portal Sevice","On/Of
 service.rmempty = false
 
 network = s:taboption( "basic",ListValue, "network","Interface")
-network:value("br-hotspot", "Hotspot")
-network:value("br-lan", "LAN")
+network:value("hotspot", "Hotspot")
+network:value("lan", "LAN")
 url = s:taboption( "basic",Value, "domain","Captive portal url","portal.nextify.vn/splash")
 --url.rmempty = true
 --url:depends({enable_cpn="1"})

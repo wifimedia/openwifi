@@ -6,7 +6,7 @@ PREAUTHENTICATED_ADDRS=/tmp/preauthenticated_addrs
 PREAUTHENTICATED_ADDR_FB=/tmp/preauthenticated_addr_fb
 PREAUTHENTICATED_RULES=/tmp/preauthenticated_rules
 NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-networkncpn=${NET_ID:-br-lan}
+networkncpn=${NET_ID:-lan}
 walledgadent=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users | sed 's/,/ /g'`
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
@@ -78,8 +78,16 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
 		uci commit
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw"
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+		if [ -z "$inf" ];then #neu khong co int thi
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
+			uci set wifimedia.@nodogsplash[0].network="br-hotspot"
+			uci set wireless.default_radio0.network="hotspot"			
+		else
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
+			uci set wifimedia.@nodogsplash[0].network="br-lan"
+		fi
 		if network_get_ipaddr addr "wan"; then
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
 		fi			
