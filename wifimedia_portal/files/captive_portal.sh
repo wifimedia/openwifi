@@ -32,6 +32,7 @@ nds_status=`uci -q get nodogsplash.@nodogsplash[0].enabled`
 heartbeat_url=`uci -q get wifimedia.@nodogsplash[0].heartbeat`
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 ip_hotspot_gw=$(ifconfig br-hotspot | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+inf=`uci -q get network.lan`
 source /lib/functions/network.sh
 config_captive_portal() {
 	if [ $nds_status -eq 0 ];then
@@ -41,7 +42,7 @@ config_captive_portal() {
 	else	
 
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
-		uci set nodogsplash.@nodogsplash[0].gatewayinterface="$networkncpn";
+		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-$networkncpn";
 		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
 		#uci set nodogsplash.@nodogsplash[0].redirecturl="$redirecturl_default";
 		uci set nodogsplash.@nodogsplash[0].maxclients="$maxclients_default";
