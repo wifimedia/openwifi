@@ -119,7 +119,7 @@ cat $response_file | while read line ; do
 	elif [ "$key" = "wireless.ft2G" ];then
 		if [ "$value" =  "1" ];then
 			uci delete wireless.default_radio0.rsn_preauth >/dev/null 2>&1
-			uci set wireless.default_radio0.ieee80211r ="1"
+			uci set wireless.default_radio0.ieee80211r="1"
 			uci set wireless.default_radio0.ft_over_ds="1"
 			uci set wireless.default_radio0.ft_psk_generate_local="1"
 		fi	
