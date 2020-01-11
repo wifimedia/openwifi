@@ -83,7 +83,7 @@ config_captive_portal() {
 		if [ -z "$inf" ];then #neu khong co int thi
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
-			uci set wifimedia.@nodogsplash[0].network="br-hotspot"
+			uci set wifimedia.@nodogsplash[0].network="hotspot"
 			uci set wireless.default_radio0.network="hotspot"			
 		else
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
@@ -231,33 +231,23 @@ write_login(){
 
 dhcp_extension(){
 	relay=`uci -q get network.local`
+	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
 	uci del network.local.network
-	uci set network.local="interface"
 	if [ $relay != "" ];then
-		if [ $NET_ID = "br-hotspot" ];then
+		if [ $NET_ID = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
-			uci add_list network.local.network='hotspot'
-			uci set dhcp.hotspot.ignore='1'
-			uci set wireless.default_radio0.network='hotspot'
-			#uci set wireless.default_radio1.network='hotspot'
 		else
 			uci set network.local.ipaddr=$ip_lan_gw
-			uci add_list network.local.network='lan'
-			uci set dhcp.lan.ignore='1'
-			uci set wireless.default_radio0.network='lan'
-			#uci set wireless.default_radio1.network='lan'
-		fi	
+		fi
+		uci add_list network.local.network=$NET_ID
+		uci set dhcp.$NET_ID.ignore='1'
+		uci set wireless.default_radio0.network=$NET_ID
+		uci set wireless.default_radio1.network=$NET_ID		
 		uci add_list network.local.network='wan'
 	else
-		NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-		if [ $NET_ID = "br-hotspot" ];then
-			uci set wireless.default_radio0.network='hotspot'
-		else
-			uci set wireless.default_radio0.network='lan'
-		fi	
-		uci set dhcp.lan.ignore='0'
-		uci set dhcp.hotspot.ignore='0'
 
+		uci set wireless.default_radio0.network=$NET_ID
+		uci set dhcp.$NET_ID.ignore='0'
 	fi
 	uci commit && wifi up
 }
