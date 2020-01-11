@@ -96,6 +96,7 @@ cat $response_file | while read line ; do
 	elif [ "$key" = "wireless.radio2G.channel" ];then
 		uci set wireless.radio0.channel="$value"
 	elif [ "$key" = "wireless.radio2G.htmode" ];then
+		value=$(echo $value | tr a-z A-Z)
 		uci set wireless.radio0.htmode="$value"
 	elif [ "$key" = "wireless.radio2G.txpower" ];then
 		uci set wireless.radio0.txpower="$value"
