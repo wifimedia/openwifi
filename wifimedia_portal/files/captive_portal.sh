@@ -6,7 +6,7 @@ PREAUTHENTICATED_ADDRS=/tmp/preauthenticated_addrs
 PREAUTHENTICATED_ADDR_FB=/tmp/preauthenticated_addr_fb
 PREAUTHENTICATED_RULES=/tmp/preauthenticated_rules
 NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-networkncpn=${NET_ID:-br-lan}
+networkncpn=${NET_ID:-lan}
 walledgadent=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users | sed 's/,/ /g'`
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
@@ -41,7 +41,9 @@ config_captive_portal() {
 	else	
 
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
-		uci set nodogsplash.@nodogsplash[0].gatewayinterface="$networkncpn";
+		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-$networkncpn";
+		uci set wireless.default_radio0.network="$networkncpn"
+		#uci set wireless.default_radio1.network="$networkncpn"
 		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
 		#uci set nodogsplash.@nodogsplash[0].redirecturl="$redirecturl_default";
 		uci set nodogsplash.@nodogsplash[0].maxclients="$maxclients_default";
@@ -228,26 +230,15 @@ dhcp_extension(){
 			uci set network.local.ipaddr=$ip_hotspot_gw
 			uci add_list network.local.network='hotspot'
 			uci set dhcp.hotspot.ignore='1'
-			uci set wireless.default_radio0.network='hotspot'
-			#uci set wireless.default_radio1.network='hotspot'
 		else
 			uci set network.local.ipaddr=$ip_lan_gw
 			uci add_list network.local.network='lan'
 			uci set dhcp.lan.ignore='1'
-			uci set wireless.default_radio0.network='lan'
-			#uci set wireless.default_radio1.network='lan'
 		fi	
 		uci add_list network.local.network='wan'
 	else
-		NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-		if [ $NET_ID = "br-hotspot" ];then
-			uci set wireless.default_radio0.network='hotspot'
-		else
-			uci set wireless.default_radio0.network='lan'
-		fi	
 		uci set dhcp.lan.ignore='0'
 		uci set dhcp.hotspot.ignore='0'
-
 	fi
 	uci commit && wifi up
 }
