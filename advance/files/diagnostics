@@ -29,7 +29,11 @@ for i in $diagnostics_file; do
 	fi
 done
 
-
+diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
+touch $diag_file
+echo "192.168.1.2" >$diag_file
+ip=`cat $diag_file`
+echo "IP Diagnostic "$ip
 
 	elif [ "$key" =  "network.diagnostics" ]; then
 		value=$(echo $value | sed 's/,/ /g')
