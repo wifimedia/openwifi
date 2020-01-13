@@ -6,6 +6,9 @@
 
 diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
 touch $diag_file
+touch /tmp/ports
+touch /tmp/client_connect_wlan
+
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	echo $PUBLIC_IP
@@ -319,7 +322,7 @@ if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	/etc/init.d/network restart
 	rm /tmp/network_flag
-	echo "upwifi"
+	#echo "WIFI Online"
 fi
 	
 }
