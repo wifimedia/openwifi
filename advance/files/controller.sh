@@ -225,7 +225,6 @@ cat $response_file | while read line ; do
 		if [ "$value" = "1" ];then ##Static 
 			uci set network.lan.proto="static"	
 		else ##DHCP Client nhan IP
-			uci delete network.lan
 			uci set network.lan.proto="dhcp"	
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
@@ -240,14 +239,13 @@ cat $response_file | while read line ; do
 	###WAN config
 	elif [ "$key" = "network.wan.static" ];then
 		echo 1 >/tmp/network_flag
-		uci delete network.lan >/dev/null 2>&1
+		uci delete network.wan >/dev/null 2>&1
 		uci set network.wan="interface"
 		uci set network.wan.type="bridge"	
 		uci set network.wan.ifname="eth0.2"		
 		if [ "$value" = "1" ];then ##Static 
 			uci set network.wan.proto="static"	
 		else ##DHCP Client nhan IP
-			uci delete network.wan
 			uci set network.wan.proto="dhcp"
 		fi
 	elif [  "$key" = "network.wan.ip" ];then
@@ -304,25 +302,25 @@ if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
 	reboot
 fi
 
-if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
-	echo "Config & Start CPN" 
-	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
-	/etc/init.d/cron restart
-else
-  echo "Stop CPN"
-  /etc/init.d/nodogsplash stop
-fi
-if [ $(cat /tmp/clientdetect) -eq 1 ]; then
-	echo "restarting conjob"
-	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
-fi
+#if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
+#	echo "Config & Start CPN" 
+#	/sbin/wifimedia/captive_portal.sh config_captive_portal
+#	echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
+#	/etc/init.d/cron restart
+#else
+#  echo "Stop CPN"
+#  /etc/init.d/nodogsplash stop
+#fi
+#if [ $(cat /tmp/clientdetect) -eq 1 ]; then
+#	echo "restarting conjob"
+#	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
+#fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	/etc/init.d/network restart
 	rm /tmp/network_flag
-	#echo "WIFI Online"
+	echo "WIFI Online"
 fi
 	
 }
@@ -389,14 +387,8 @@ token(){
 
 diagnostics(){
 	ip=`cat $diag_file`
-	if grep -q "." $diag_file; then
-		echo "we have new diagnostics to apply!"
-	else
-		echo "no diagnostics the existing."
-		exit
-	fi
 	for i in $ip; do
-		ping -c 3 "$i" >/dev/null
+		ping -c 2 "$i" >/dev/null
 		if [ $? -eq "0" ];then
 			echo $i":success" >>/tmp/diagnostics_log
 		else

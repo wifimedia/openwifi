@@ -78,3 +78,33 @@ diagnostics(){
 	rm /tmp/diagnostics_log
 	rm $diag_file
 }
+
+
+
+diagnostics(){
+	diag_file1=/tmp/diagnostics_ip_1
+	touch $diag_file1
+	ip=`cat $diag_file1`
+
+	for i in $ip; do
+		ping -c 2 "$i" >/dev/null
+		if [ $? -eq "0" ];then
+			echo $i":success" >>/tmp/diagnostics_log
+		else
+			echo $i":false" >>/tmp/diagnostics_log
+		fi
+	done
+	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
+	echo $diagnostics_resulte
+
+}
+
+uci -q get wifimedia.@nodogsplash[0] || {
+        uci batch <<EOF
+        add wifimedia nodogsplash
+		set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
+		set wifimedia.@nodogsplash[0].https=0
+		set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+        commit wifimedia
+EOF
+}
