@@ -266,21 +266,21 @@ cat $response_file | while read line ; do
 		uci set dhcp.lan.leasetime="$value"
 		
 	#Cau hinh Captive Portal
-	elif [  "$key" = "cpn.enable" ];then
-		echo $value >/tmp/cpn_flag
-		uci set nodogsplash.@nodogsplash[0].enabled="$value"
-	elif [  "$key" = "cpn.domain" ];then
-		uci set wifimedia.@nodogsplash[0].domain="$value"
-	elif [  "$key" = "cpn.walledgarden" ];then
-		value=$(echo $value | sed 's/,/ /g')
-		uci set wifimedia.@nodogsplash[0].preauthenticated_users="$value"
-	elif [  "$key" = "cpn.fb" ];then
-		uci set wifimedia.@nodogsplash[0].facebook="$value"
-	elif [  "$key" = "cpn.dhcpextenal" ];then
-		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
-	elif [  "$key" = "cpn.clientdetect" ];then
-		uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
-		echo $value >/tmp/clientdetect
+	#elif [  "$key" = "cpn.enable" ];then
+	#	echo $value >/tmp/cpn_flag
+	#	uci set nodogsplash.@nodogsplash[0].enabled="$value"
+	#elif [  "$key" = "cpn.domain" ];then
+	#	uci set wifimedia.@nodogsplash[0].domain="$value"
+	#elif [  "$key" = "cpn.walledgarden" ];then
+	#	value=$(echo $value | sed 's/,/ /g')
+	#	uci set wifimedia.@nodogsplash[0].preauthenticated_users="$value"
+	#elif [  "$key" = "cpn.fb" ];then
+	#	uci set wifimedia.@nodogsplash[0].facebook="$value"
+	#elif [  "$key" = "cpn.dhcpextenal" ];then
+	#	uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
+	#elif [  "$key" = "cpn.clientdetect" ];then
+	#	uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
+	#	echo $value >/tmp/clientdetect
 	#Cau hinh auto reboot
 	elif [  "$key" = "scheduletask.enable" ];then
 		echo $value >/tmp/scheduled_flag
