@@ -4,6 +4,9 @@
 
 . /sbin/wifimedia/variables.sh
 
+diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
+touch $diag_file
+
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	#echo $PUBLIC_IP
@@ -322,9 +325,14 @@ token(){
 }
 
 diagnostics(){
-	diagnostics_file=`cat /tmp/diagnostics_ip`
-	#echo $diagnostics_file
-	for i in $diagnostics_file; do
+	ip=`cat $diag_file`
+	if grep -q "." $diag_file; then
+		echo "we have new diagnostics to apply!"
+	else
+		echo "no diagnostics the existing."
+		exit
+	fi
+	for i in $ip; do
 		ping -c 3 "$i" >/dev/null
 		if [ $? -eq "0" ];then
 			echo $i":success" >>/tmp/diagnostics_log
@@ -334,6 +342,7 @@ diagnostics(){
 	done
 	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
 	rm /tmp/diagnostics_log
+	rm $diag_file
 }
 
 monitor_port(){
