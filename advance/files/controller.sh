@@ -199,12 +199,12 @@ cat $response_file | while read line ; do
 		value=$(echo $value | sed 's/,/ /g')
 		uci set network.wan.dns="$value"		
 	##Cau hinh DHCP
-	elif [  "$key" = "lan.dhcp.start" ];then
+	elif [  "$key" = "network.dhcp.start" ];then
 		uci set dhcp.lan.start="$value"
-	elif [  "$key" = "lan.dhcp.limit" ];then
+	elif [  "$key" = "network.dhcp.limit" ];then
 		uci set dhcp.lan.limit="$value"
-	elif [  "$key" = "lan.dhcp.leasetime" ];then
-		uci set dhcp.lan.leasetime="$value"
+	elif [  "$key" = "network.dhcp.leasetime" ];then
+		uci set dhcp.network.leasetime="$value"
 		
 	#Cau hinh Captive Portal
 	elif [  "$key" = "cpn.enable" ];then
