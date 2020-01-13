@@ -234,7 +234,7 @@ cat $response_file | while read line ; do
 		uci set scheduled.@times[0].minute="$value"
 	elif [ "$key" =  "network.diagnostics" ]; then
 		value=$(echo $value | sed 's/,/ /g')
-		echo $value >/tmp/diagnostics_ip		
+		echo $value >$diag_file		
 	fi
 ##
 done	
@@ -328,14 +328,9 @@ token(){
 
 diagnostics(){
 	ip=`cat $diag_file`
-	if grep -q "." $diag_file; then
-		echo "we have new diagnostics to apply!"
-	else
-		echo "no diagnostics the existing."
-		exit
-	fi
+
 	for i in $ip; do
-		ping -c 3 "$i" >/dev/null
+		ping -c 2 "$i" >/dev/null
 		if [ $? -eq "0" ];then
 			echo $i":success" >>/tmp/diagnostics_log
 		else
