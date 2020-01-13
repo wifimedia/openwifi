@@ -307,7 +307,7 @@ fi
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start CPN" 
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	echo '*/5 * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
+	echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
 	/etc/init.d/cron restart
 else
   echo "Stop CPN"
