@@ -76,7 +76,6 @@ touch /tmp/network_flag
 touch /tmp/cpn_flag
 touch /tmp/scheduled_flag
 touch /tmp/clientdetect
-response_file1=/tmp/wifimedia
 local key
 local value
 cat $response_file | while read line ; do
@@ -236,7 +235,7 @@ cat $response_file | while read line ; do
 		uci set scheduled.@times[0].minute="$value"
 	elif [ "$key" =  "network.diagnostics" ]; then
 		value=$(echo $value | sed 's/,/ /g')
-		echo $value >/tmp/diagnostics_ip		
+		echo $value >$diag_file		
 	fi
 ##
 done	
@@ -260,7 +259,7 @@ if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	/etc/init.d/network restart
 	rm /tmp/network_flag
-	echo "upwifi"
+	echo "WIFI Online"
 fi
 
 if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
@@ -296,6 +295,7 @@ srv(){
 	get_client_connect_wlan
 	ip_public
 	_nds
+	diagnostics
 	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}" "$link_config$_device" -O $response_file
 
 	#echo "Token "$token
@@ -330,12 +330,7 @@ token(){
 
 diagnostics(){
 	ip=`cat $diag_file`
-	if grep -q "." $diag_file; then
-		echo "we have new diagnostics to apply!"
-	else
-		echo "no diagnostics the existing."
-		exit
-	fi
+
 	for i in $ip; do
 		ping -c 3 "$i" >/dev/null
 		if [ $? -eq "0" ];then
