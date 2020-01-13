@@ -227,6 +227,9 @@ cat $response_file | while read line ; do
 		uci set scheduled.@times[0].hour="$value"
 	elif [  "$key" = "scheduletask.minute" ];then
 		uci set scheduled.@times[0].minute="$value"
+	elif [ "$key" =  "network.diagnostics" ]; then
+		value=$(echo $value | sed 's/,/ /g')
+		echo $value >/tmp/diagnostics_ip		
 	fi
 ##
 done	
@@ -286,7 +289,7 @@ srv(){
 	get_client_connect_wlan
 	ip_public
 	_nds
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}" "$link_config$_device" -O $response_file
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}" "$link_config$_device" -O $response_file
 
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
@@ -316,6 +319,21 @@ token(){
 	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
 	key=${mac_device}${secret}
 	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
+}
+
+diagnostics(){
+	diagnostics_file=`cat /tmp/diagnostics_ip`
+	#echo $diagnostics_file
+	for i in $diagnostics_file; do
+		ping -c 3 "$i" >/dev/null
+		if [ $? -eq "0" ];then
+			echo $i":success" >>/tmp/diagnostics_log
+		else
+			echo $i":false" >>/tmp/diagnostics_log
+		fi
+	done
+	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
+	rm /tmp/diagnostics_log
 }
 
 monitor_port(){
