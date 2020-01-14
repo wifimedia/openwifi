@@ -157,7 +157,7 @@ cat $response_file | while read line ; do
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0"
+			uci set network.wan.ifname="eth0.2"
 			uci set wireless.@wifi-iface[0].network="wan"
 			uci set wifimedia.@switchmode[0].switch_port="0"
 			uci commit			
