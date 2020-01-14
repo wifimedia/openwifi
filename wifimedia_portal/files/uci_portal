@@ -4,15 +4,9 @@
 echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
-#echo '* * * * * /sbin/wifimedia/captive_portal.sh get_captive_portal_clients' >$_nds
-echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >$_nds
-echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>$_nds
-#echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >/etc/crontabs/nds
-#echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>/etc/crontabs/nds && /etc/init.d/cron restart
-#NET_ID="nextify"
-#FW_ZONE="nextify"
-#IFNAME="eth0.1" #VLAN1
-#IFNAME99="eth0.99" #VLAN1
+echo '* * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
+echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >>$_nds
+#echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/nds && /etc/init.d/cron restart
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
 MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
@@ -21,7 +15,7 @@ echo '<!doctype html>
 <html lang="en">
   <head>
       <meta charset="utf-8">
-      <title>$gatewayname</title>
+      <title>Captive Portal</title>
   </head>
   <body>
       <form id="info" method="POST" action="//'$domain_default'">
@@ -63,6 +57,8 @@ uci -q get wifimedia.@nodogsplash[0] || {
         commit wifimedia
 EOF
 }
+uci set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+uci commit wifimedia
 
 /etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'
