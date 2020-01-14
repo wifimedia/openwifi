@@ -17,7 +17,7 @@ ip_public(){
 wr840v4() { #checking internet
 
 	#check gateway
-	ping -c 3 "$gateway" > /dev/null
+	ping -c 2 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
 		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wps/
 		echo timer > trigger
@@ -27,7 +27,7 @@ wr840v4() { #checking internet
 	fi
 
 	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
+	ping -c 2 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
 		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wan/
 		echo timer > trigger
@@ -40,7 +40,7 @@ wr840v4() { #checking internet
 wr840v620() { #checking internet
 
 	#checking internet
-	ping -c 5 "8.8.8.8" > /dev/null
+	ping -c 2 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
 		echo 1 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wan/brightness
 		echo 1 >/sys/devices/platform/leds/leds/tl-wr840n-v6:orange:wan/brightness
@@ -50,7 +50,7 @@ wr840v620() { #checking internet
 	fi
 	
 	#check gateway
-	ping -c 3 "$gateway" > /dev/null
+	ping -c 2 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
 		echo timer >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wlan/trigger
 	else
@@ -63,7 +63,7 @@ wr840v620() { #checking internet
 wr841v14() { #checking internet
 
 	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
+	ping -c 2 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
 		echo timer >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:wan/trigger
 		echo none >/sys/devices/platform/leds/leds/tl-wr841n-v14:orange:wan/trigger
@@ -72,7 +72,7 @@ wr841v14() { #checking internet
 		echo timer >/sys/devices/platform/leds/leds/tl-wr841n-v14:orange:wan/trigger
 	fi
 	#check gateway
-	ping -c 3 "$gateway" > /dev/null
+	ping -c 2 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
 		echo 1 >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:wlan/brightness
 		echo timer >/sys/devices/platform/leds/leds/tl-wr841n-v14:green:lan/trigger
@@ -87,7 +87,7 @@ wr841v14() { #checking internet
 wr840v13() { #checking internet
 
 	#check gateway
-	ping -c 3 "$gateway" > /dev/null
+	ping -c 2 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
 		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wps/
 		echo timer > trigger
@@ -97,7 +97,7 @@ wr840v13() { #checking internet
 	fi
 	
 	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
+	ping -c 2 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
 		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wan/
 		echo timer > trigger
