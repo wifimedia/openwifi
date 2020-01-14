@@ -3,14 +3,6 @@
 rnd=`cat /dev/urandom | tr -dc 'A-Z' | head -c1`
 model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
 newifi3=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | awk '{print $1}')
-uci -q get system.@reset_all[0] || {
-	uci batch <<-EOF
-	add system reset_all
-	set system.@reset_all[0]=reset_all
-	commit system
-EOF
-}
-
 ###Sync
 uci -q get wifimedia.@sync[0] || {
 	uci batch <<-EOF
@@ -83,30 +75,6 @@ uci batch <<-EOF
 	set system.@system[0].timezone=ICT-7
 EOF
 
-if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND_v4" ] || [ "$model_hardware" == "CF-E320N_v2" ] || [ "$model_hardware" == "TL-WR940N_v4" ] || [ "$model_hardware" == "TL-WR940N_v6" ] || [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
-	uci batch <<-EOF
-		set network.lan.ipaddr=172.16.99.1
-		#set network.lan.ipaddr=192.168.6.1 #set commit ipaddr for TPLink 940V3 WR841V11
-		set network.wan.type=bridge
-		delete network.globals
-		set dhcp.lan.force=1
-		set dhcp.lan.netmask=255.255.255.0
-		add_list dhcp.lan.dhcp_option=6,8.8.8.8,8.8.4.4
-		commit
-	EOF
-
-	uci batch <<-EOF
-		set wireless.default_radio0.maxassoc=30
-		set wireless.@wifi-iface[0].ssid=WIFIMEDIA.VN
-		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		#set wireless.@wifi-iface[0].encryption="psk2"
-		#set wireless.@wifi-iface[0].key="123456A@$rnd"
-		set wireless.radio0.disabled=0
-		commit wireless
-	EOF
-
-fi
-
 
 if [ "$newifi3" == "Newifi-D2" ];then
 	uci batch <<-EOF
@@ -143,62 +111,14 @@ if [ "$newifi3" == "Newifi-D2" ];then
 		set wireless.default_radio0.maxassoc=30	
 		commit wireless
 	EOF
+	echo "NEWIFI" >/etc/hardware
 fi
 
-
-
-if [ "$model_hardware" == "TL-WR840N_v6" ] || [ "$model_hardware" == "TL-WR841N_v14" ] || [ "$model_hardware" == "TL-WR840N_v4" ] || [ "$model_hardware" == "TL-WR841N_v13" ] || [ "$model_hardware" == "TL-WR840N_v5" ];then
-	uci batch <<-EOF
-		set network.lan.ipaddr=192.168.5.1
-		set network.wan.type=bridge
-		delete network.globals
-		set dhcp.lan.force=1
-		set dhcp.lan.netmask=255.255.255.0
-		add_list dhcp.lan.dhcp_option=6,8.8.8.8,8.8.4.4
-		commit
-	EOF
-
-	uci batch <<-EOF
-		set wireless.@wifi-iface[0].maxassoc=30
-		#set wireless.@wifi-iface[0].ssid=OPENWIFI
-		set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		set wireless.@wifi-iface[0].encryption="psk2"
-		set wireless.@wifi-iface[0].key="123456A@$rnd"
-		set wireless.@wifi-iface[0].disabled=0
-		commit wireless
-	EOF
-fi
-
-if [ "$model_hardware" == "TL-WR840N_v4" ];then
-	echo "TL-WR840N v4" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR741ND_v4" ];then
-	echo "TL-WR740N v4" >/etc/hardware		
-elif [ "$model_hardware" == "TL-WA901ND_v3" ];then
-	echo "TL-WA901ND v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v13" ];then
-	echo "TL-WR841N v13" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v4" ];then
-	echo "TL-WR940N v5" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v6" ];then
-	echo "TL-WR940N v6.1" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
-	echo "TL-WR940N v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR840N_v5" ];then
-	echo "TL-WR840N v5" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v14" ];then
-	echo "TL-WR840N v6" >/etc/hardware
-elif [ "$model_hardware" == "CF-E355AC_v2" ];then
-	echo "EAP35AC v2" >/etc/hardware
-	uci set meshdesk.settings.id_if="eth1"
-	uci commit meshdesk
-elif [ "$model_hardware" == "CF-E320N_v2" ];then
-	echo "EAP320v2" >/etc/hardware
-	uci set meshdesk.settings.id_if="eth1"
-	uci commit meshdesk
-elif [ "$newifi3" == "Newifi-D2" ];then
-	echo "NEWIFI" >/etc/hardware	
-fi
-
+#enable wifi
+uci set wireless.radio0.disabled="0"
+uci commit wireless
+wifi
+#for hwmode n ac
 uci batch <<-EOF
 	delete network.wan6
 	commit network
@@ -208,7 +128,88 @@ uci batch <<-EOF
 	set firewall.@zone[1].input="ACCEPT"
 	commit firewall
 	EOF
-	
+		
+#Password	
+echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
+echo -e "admin:*:0:0:99999:7:::" >>/etc/shadow
+echo -e "wifimedia\nwifimedia" | passwd admin
+
+echo -e "wifimedia:x:0:0:wifimedia:/root:/bin/ash" >>/etc/passwd
+echo -e "wifimedia:*:0:0:99999:7:::" >>/etc/shadow
+echo -e "09465670089\n09465670089" | passwd wifimedia
+
+#Change password for root
+word=$(cat /sys/class/ieee80211/phy0/macaddress | cut -c  10,11,13,14,16,17 | sed 's/://g' |awk '{print $1}'|tr a-z A-Z)
+pwd=$(echo -n $word | md5sum | awk '{print $1}')
+#echo -e "$pwd\n$pwd" | passwd root
+echo -e "wifimedia\nwifimedia" | passwd root
+#End
+
+#Cron heartbeat
+echo '* * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root  #monitor
+echo '* * * * * /sbin/wifimedia/controller.sh checking' >>/etc/crontabs/root
+#Info
+CODENAME="wifimedia"
+if [ -f "/etc/codename" ]; then
+	source /etc/codename
+fi
+uci batch <<-EOF
+	delete wifimedia.Version
+	set wifimedia.Version=version
+	set wifimedia.Version.ver=$CODENAME
+	commit wifimedia
+EOF
+
+source /etc/openwrt_release
+rm -f /etc/openwrt_release
+DISTRIB_DESCRIPTION=$(uci get wifimedia.Version.ver)""
+echo 'DISTRIB_ID="'"$DISTRIB_ID"'"' >> /etc/openwrt_release
+echo 'DISTRIB_RELEASE="'"$DISTRIB_RELEASE"'"' >> /etc/openwrt_release
+echo 'DISTRIB_REVISION="'" "'"' >> /etc/openwrt_release
+echo 'DISTRIB_CODENAME="'"$DISTRIB_CODENAME"'"' >> /etc/openwrt_release
+echo 'DISTRIB_TARGET="'"$DISTRIB_TARGET"'"' >> /etc/openwrt_release
+echo 'DISTRIB_DESCRIPTION="'"$DISTRIB_DESCRIPTION"'"' >> /etc/openwrt_release
+
+
+uci set dhcp.lan.start=99
+uci set dhcp.lan.limit=100
+uci set dhcp.lan.leasetime=1h
+uci commit dhcp
+#SYNCH TIME
+uci batch <<-EOF
+	del system.ntp
+	set system.ntp=timeserver
+        add_list system.ntp.server='0.asia.pool.ntp.org'
+        add_list system.ntp.server='1.asia.pool.ntp.org'
+        add_list system.ntp.server='2.asia.pool.ntp.org'
+        add_list system.ntp.server='3.asia.pool.ntp.org'
+	set system.ntp.enabled=1
+	set system.ntp.enable_server=1
+	commit system
+EOF
+/etc/init.d/sysntpd start >/dev/null
+uci set luci.diag.dns="google.com.vn"
+uci set luci.diag.ping="google.com.vn"
+uci set luci.diag.route="google.com.vn"
+
+#Change ssh
+uci batch <<-EOF
+	set dropbear.@dropbear[0].Port=2702
+	commit dropbear
+EOF
+
+###Sync
+uci -q get wifimedia.@sync[0] || {
+	uci batch <<-EOF
+	add wifimedia sync
+	set wifimedia.@sync[0]=sync
+	set wifimedia.@sync[0].version=2.1.0
+	#set wifimedia.@sync[0].domain="crm.wifimedia.com.vn"
+	set wifimedia.@sync[0].server="http://monitor.wifimedia.vn/api/monitoring/"
+	commit wifimedia
+EOF
+}
+
 NET_ID="hotspot"
 FW_ZONE="hotspot"
 IFNAME="eth0.300" #VLAN1
@@ -278,104 +279,12 @@ uci batch << EOF
 	commit firewall
 EOF
 
-#Password	
-echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
-echo -e "admin:*:0:0:99999:7:::" >>/etc/shadow
-echo -e "wifimedia\nwifimedia" | passwd admin
-
-echo -e "wifimedia:x:0:0:wifimedia:/root:/bin/ash" >>/etc/passwd
-echo -e "wifimedia:*:0:0:99999:7:::" >>/etc/shadow
-echo -e "09465670089\n09465670089" | passwd wifimedia
-
-#Change password for root
-word=$(cat /sys/class/ieee80211/phy0/macaddress | cut -c  10,11,13,14,16,17 | sed 's/://g' |awk '{print $1}'|tr a-z A-Z)
-pwd=$(echo -n $word | md5sum | awk '{print $1}')
-#echo -e "$pwd\n$pwd" | passwd root
-echo -e "wifimedia\nwifimedia" | passwd root
-#End
-
-#Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root  #monitor
-echo '* * * * * /sbin/wifimedia/controller.sh checking' >>/etc/crontabs/root
-
-#Info
-CODENAME="wifimedia"
-if [ -f "/etc/codename" ]; then
-	source /etc/codename
-fi
-uci batch <<-EOF
-	delete wifimedia.Version
-	set wifimedia.Version=version
-	set wifimedia.Version.ver=$CODENAME
-	commit wifimedia
-EOF
-
-echo "" >/etc/config/openvpn
-source /etc/openwrt_release
-rm -f /etc/openwrt_release
-DISTRIB_DESCRIPTION=$(uci get wifimedia.Version.ver)""
-echo 'DISTRIB_ID="'"$DISTRIB_ID"'"' >> /etc/openwrt_release
-echo 'DISTRIB_RELEASE="'"$DISTRIB_RELEASE"'"' >> /etc/openwrt_release
-echo 'DISTRIB_REVISION="'" "'"' >> /etc/openwrt_release
-echo 'DISTRIB_CODENAME="'"$DISTRIB_CODENAME"'"' >> /etc/openwrt_release
-echo 'DISTRIB_TARGET="'"$DISTRIB_TARGET"'"' >> /etc/openwrt_release
-echo 'DISTRIB_DESCRIPTION="'"$DISTRIB_DESCRIPTION"'"' >> /etc/openwrt_release
-
-#rm -f /etc/privoxy/default.action
-#rm -f /etc/privoxy/default.filter
-
-#chmod a+x /sbin/wifimedia/*.sh
-/etc/init.d/system reload
-/etc/init.d/led reload
-
-/etc/init.d/cron start
-/etc/init.d/cron enable
-/etc/init.d/wifimedia_upgrade enable
-
-uci set dhcp.lan.start=99
-uci set dhcp.lan.limit=100
-uci set dhcp.lan.leasetime=1h
-uci commit dhcp
-#SYNCH TIME
-uci batch <<-EOF
-	del system.ntp
-	set system.ntp=timeserver
-        add_list system.ntp.server='0.asia.pool.ntp.org'
-        add_list system.ntp.server='1.asia.pool.ntp.org'
-        add_list system.ntp.server='2.asia.pool.ntp.org'
-        add_list system.ntp.server='3.asia.pool.ntp.org'
-	set system.ntp.enabled=1
-	set system.ntp.enable_server=1
-	commit system
-EOF
-/etc/init.d/sysntpd start >/dev/null
-##LED XIAOMI-MIWIFI
-#uci batch <<-EOF
-#	set system.led_power.name='power'
-#	set system.led_power.default='1'
-#	set system.led_power.trigger='netdev'
-#	set system.led_power.dev='br-wan'
-#	set system.led_power.mode='link tx rx'
-#	set system.led_power.sysfs='xiaomi:blue:status'
-#	commit system
-#EOF
-uci set luci.diag.dns="google.com.vn"
-uci set luci.diag.ping="google.com.vn"
-uci set luci.diag.route="google.com.vn"
-
-#Change ssh
-uci batch <<-EOF
-	set dropbear.@dropbear[0].Port=2702
-	commit dropbear
-EOF
 touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
+chmod +x /sbin/wifimedia/*
+/etc/init.d/cron start
 /etc/init.d/dropbear restart
 /etc/init.d/network restart
-#/etc/init.d/watchcat start #start watchcat
-chmod +x /sbin/wifimedia/*
-/etc/init.d/cron restart
-wifi up
-#rm -f /etc/uci-defaults/wifimedia
-#sleep 5 && reboot
+/etc/init.d/network_reload enable
+ifup lan
