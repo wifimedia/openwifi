@@ -2,6 +2,7 @@
 
 rnd=`cat /dev/urandom | tr -dc 'A-Z' | head -c1`
 model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
+A1=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z | cut -c  16,17 | sed 's/://g' |awk '{print $1}'|tr a-z A-Z)
 
 ###Sync
 uci -q get wifimedia.@sync[0] || {
