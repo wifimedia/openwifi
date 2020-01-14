@@ -325,7 +325,7 @@ diagnostics(){
 	ip=`cat $diag_file`
 
 	for i in $ip; do
-		ping -c 3 "$i" >/dev/null
+		ping -c 2 "$i" >/dev/null
 		if [ $? -eq "0" ];then
 			echo $i":success" >>/tmp/diagnostics_log
 		else
