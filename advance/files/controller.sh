@@ -3,6 +3,11 @@
 # All rights reserved.
 
 . /sbin/wifimedia/variables.sh
+diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
+touch $diag_file
+touch /tmp/ports
+touch /tmp/client_connect_wlan
+touch /tmp/diagnostics_log
 
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
@@ -131,12 +136,13 @@ cat "/tmp/wifimedia" | while read line ; do
 	##Cau hinh switch 5 port		
 	elif [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
+		uci set wireless.@wifi-iface[0].network="wan"
+		uci set wifimedia.@switchmode[0].switch_port="$value"		
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0 eth1.1"
-			uci set wireless.@wifi-iface[0].network="wan"
-			uci set wifimedia.@switchmode[0].switch_port="$value"
+			uci set network.wan.ifname="eth0.1 eth0.2"
+
 			uci commit
 		else
 			uci set network.lan="interface"
@@ -144,7 +150,7 @@ cat "/tmp/wifimedia" | while read line ; do
 			uci set network.lan.ipaddr="172.16.99.1"
 			uci set network.lan.netmask="255.255.255.0"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"
+			uci set network.lan.ifname="eth0.1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
@@ -161,11 +167,11 @@ cat "/tmp/wifimedia" | while read line ; do
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.ifname="eth0.1"		
 		else ##DHCP Client nhan IP
 			uci delete network.lan
 			uci set network.lan.proto="dhcp"
-			uci set network.lan.ifname="eth1.1"		
+			uci set network.lan.ifname="eth0.1"		
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -183,11 +189,11 @@ cat "/tmp/wifimedia" | while read line ; do
 			uci set network.wan="interface"
 			uci set network.wan.proto="static"
 			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0.2"		
 		else ##DHCP Client nhan IP
 			uci delete network.wan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0.2"		
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -199,11 +205,11 @@ cat "/tmp/wifimedia" | while read line ; do
 		value=$(echo $value | sed 's/,/ /g')
 		uci set network.lan.dns="$value"		
 	##Cau hinh DHCP
-	elif [  "$key" = "lan.dhcp.start" ];then
+	elif [  "$key" = "network.dhcp.start" ];then
 		uci set dhcp.lan.start="$value"
-	elif [  "$key" = "lan.dhcp.limit" ];then
+	elif [  "$key" = "network.dhcp.limit" ];then
 		uci set dhcp.lan.limit="$value"
-	elif [  "$key" = "lan.dhcp.leasetime" ];then
+	elif [  "$key" = "network.dhcp.leasetime" ];then
 		uci set dhcp.lan.leasetime="$value"
 		
 	#Cau hinh Captive Portal
@@ -229,19 +235,18 @@ cat "/tmp/wifimedia" | while read line ; do
 		uci set scheduled.@times[0].hour="$value"
 	elif [  "$key" = "scheduletask.minute" ];then
 		uci set scheduled.@times[0].minute="$value"
+	elif [ "$key" =  "network.diagnostics" ]; then
+		value=$(echo $value | sed 's/,/ /g')
+		echo $value >$diag_file		
 	fi
 ##
 done	
 uci commit
-if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
-	echo "restarting the node"
-	reboot
-fi
 
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start CPN" 
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	echo '*/5 * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
+	echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
 	/etc/init.d/cron restart
 else
   echo "Stop CPN"
@@ -255,8 +260,14 @@ fi
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	/etc/init.d/network restart
+	rm /tmp/network_flag
+	echo "WIFI Online"
 fi
-	
+
+if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
+	echo "restarting the node"
+	 sleep 5 && reboot
+fi
 }
 
 _boot(){
