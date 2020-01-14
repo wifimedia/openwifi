@@ -9,15 +9,6 @@ ip_public(){
 	#echo $PUBLIC_IP
 }
 
-meshdesk(){
-	dnsctl=$(uci -q get meshdesk.internet1.dns)
-	ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`
-	if [ "$ip" != "" ] &&  [ -e /etc/config/meshdesk ];then
-		uci set meshdesk.internet1.ip=$ip
-		uci commit meshdesk
-	fi
-}
-
 checking (){
 	#Clear memory
 	if [ "$(cat /proc/meminfo | grep 'MemFree:' | awk '{print $2}')" -lt 5000 ]; then
@@ -29,32 +20,6 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
-device_cfg(){
-	token
-	monitor_port
-	get_client_connect_wlan
-	#get_client_connect_wlan $cpn_url
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${number_client}&ip_opvn=${ip_opvn}" "$link_config""$global_device" -O /tmp/device_cfg
-	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
-		start_cfg
-	fi
-	uci set wifimedia.@hash256[0].value=$hash256
-	#echo "Token "$token
-	#echo "AP MAC "$global_device
-	#echo "mac_clients "$client_connect_wlan
-	#echo "ports_data "$ports_data
-	rm /tmp/monitor_port
-	rm /tmp/client_connect_wlan
-}
-token(){
-#token = sha256(mac+secret)
- secret="(C)WifiMedia2019"
- mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
- key=${mac_device}${secret}
- echo $key
- token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
- echo $token
-}
 start_cfg(){
 
 touch /tmp/reboot_flag
@@ -64,13 +29,14 @@ touch /tmp/scheduled_flag
 touch /tmp/clientdetect
 local key
 local value
-cat $response_file | while read line ; do
-	key=$(echo "$line" | cut -f 1 -d =)
-	value=$(echo "$line" | cut -f 2- -d =)
+cat "/tmp/wifimedia" | while read line ; do
+	key=$(echo $line | cut -f 1 -d =)
+	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
 	
 	#Cau hinh hostname
 	if [ "$key" = "device.hostname" ];then
 		uci set system.@system[0].hostname="$value"
+		echo $value
 	#Mat khau thiet bi	
 	elif [ "$key" = "device.passwd" ];then
 		echo -e "$value\n$value" | passwd root
@@ -98,17 +64,15 @@ cat $response_file | while read line ; do
 			uci set wireless.default_radio0.encryption="psk2"
 		fi
 	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc2G=" ];then
-		if [ "$value" =  "1" ];then
+	elif [ "$key" = "wireless.okc2G" ];then
 			uci set wireless.default_radio0.rsn_preauth="$value"
-			uci set wireless.default_radio0.ieee80211r ="0"
-			uci set wireless.default_radio0.ft_over_ds="0"
-			uci set wireless.default_radio0.ft_psk_generate_local="0"
-		fi	
+			uci delete wireless.default_radio0.ieee80211r >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_over_ds >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_psk_generate_local >/dev/null 2>&1
 	#Chuyen dung 802.1R	
 	elif [ "$key" = "wireless.ft2G" ];then
 		if [ "$value" =  "1" ];then
-			uci set wireless.default_radio0.rsn_preauth="0"
+			uci delete wireless.default_radio0.rsn_preauth >/dev/null 2>&1
 			uci set wireless.default_radio0.ieee80211r ="1"
 			uci set wireless.default_radio0.ft_over_ds="1"
 			uci set wireless.default_radio0.ft_psk_generate_local="1"
@@ -141,18 +105,19 @@ cat $response_file | while read line ; do
 			uci set wireless.default_radio1.encryption="psk2"
 		fi
 	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc5G=" ];then
+	elif [ "$key" = "wireless.okc5G" ];then
 		if [ "$value" =  "1" ];then
 			uci set wireless.default_radio1.rsn_preauth="$value"
-			uci set wireless.default_radio1.ieee80211r ="0"
-			uci set wireless.default_radio1.ft_over_ds="0"
-			uci set wireless.default_radio1.ft_psk_generate_local="0"
+			uci delete wireless.default_radio1.ieee80211r >/dev/null 2>&1
+			uci delete wireless.default_radio1.ft_over_ds >/dev/null 2>&1
+			uci delete wireless.default_radio1.ft_psk_generate_local >/dev/null 2>&1
 		fi	
 	#Chuyen dung 802.1R	
 	elif [ "$key" = "wireless.ft5G" ];then
+		echo 1 >/tmp/network_flag
 		if [ "$value" =  "1" ];then
-			uci set wireless.default_radio1.rsn_preauth="0"
-			uci set wireless.default_radio1.ieee80211r ="1"
+			uci delete wireless.default_radio1.rsn_preauth >/dev/null 2>&1
+			uci set wireless.default_radio1.ieee80211r="1"
 			uci set wireless.default_radio1.ft_over_ds="1"
 			uci set wireless.default_radio1.ft_psk_generate_local="1"
 		fi	
@@ -288,25 +253,89 @@ if [ $(cat /tmp/clientdetect) -eq 1 ]; then
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
+	wifi down && wifi up
 	/etc/init.d/network restart
 fi
 	
 }
 
-monitor_port(){
-swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
-	echo "$line," >>/tmp/monitor_port
-done
-ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
-echo $ports_data
-#wget --post-data="gateway_mac=${global_device}&ports_data=${ports_data}" $link_config -O /dev/null
-#rm /tmp/monitor_port
-}
-_detect_clients(){
-	get_client_connect_wlan $cpn_url
+_boot(){
+	checking
+	action_lan_wlan
+	openvpn
 }
 
-##Sent Client MAC to server Nextify
+_lic(){
+	license_srv
+}
+
+device_cfg(){
+	token
+	monitor_port
+	get_client_connect_wlan
+	ip_public
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$_device" -O $response_file
+	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
+		start_cfg
+	fi
+	uci set wifimedia.@hash256[0].value=$hash256
+	#echo "Token "$token
+	#echo "AP MAC "$global_device
+	#echo "mac_clients "$client_connect_wlan
+	#echo "ports_data "$ports_data
+}
+token(){
+	#token = sha256(mac+secret)
+	secret="(C)WifiMedia2019"
+	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
+	key=${mac_device}${secret}
+	echo $key
+	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
+	echo $token
+}
+
+monitor_port(){
+	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |head -4| while read line;do
+		echo "$line," >>/tmp/monitor_port
+	done
+	#ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
+	ports=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ link:/:/g'| sed 's/port:0://g'| sed 's/port:1://g'| sed 's/port:2://g'| sed 's/port:3://g'| sed 's/port:4://g' )
+	echo $ports >/tmp/ports
+	var1=`cat /tmp/ports`
+	var2='4 3 2 1'
+	set -- $var1
+	for j in $var2;do
+		echo "$j:$1" >>/tmp/tmp_port
+		shift
+	done
+	ports_data=$(cat /tmp/tmp_port|xargs )
+	echo $ports_data
+	rm /tmp/monitor_port
+    rm /tmp/tmp_port
+}
+_detect_clients(){ #Support Nextify
+	get_client_connect_wlan
+	_post_clients
+}
+
+heartbeat(){ #Heartbeat Nextify
+	get_client_connect_wlan
+	_get_server
+}
+
+_post_clients(){ #$global_device: aa:bb:cc:dd:ee:ff
+	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
+}
+
+_get_server(){ # Connect to server Nextify
+	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+	wget -q --timeout=3 \
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
+		 -O /dev/null
+}
+
 get_client_connect_wlan(){
 	_openvpn=`pidof openvpn`
 	if [ -n "$_openvpn" ];then
@@ -334,14 +363,11 @@ get_client_connect_wlan(){
 	done
 	IFS="$OLD_IFS"
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
-	number_client=$(cat /tmp/client_connect_wlan | wc -l)
-	#monitor_port
-	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
-	echo $client_connect_wlan
+	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
 	rm /tmp/client_connect_wlan
 }
 
-action_lan_wlan(){
+action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 	echo "" > $find_mac_gateway
 	wget -q "${blacklist}" -O $find_mac_gateway
 	curl_result=$?
@@ -357,6 +383,7 @@ action_lan_wlan(){
 
 license_srv() {
 	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
+	#$_device: aa-bb-cc-dd-ee-ff
 	echo "" > $licensekey
 	wget -q "${code_srv}" -O $licensekey
 	curl_result=$?
@@ -367,14 +394,11 @@ license_srv() {
 					#Update License Key
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
-					cat /etc/opt/license/wifimedia >/etc/opt/license/status
+					echo "Activated" >/etc/opt/license/status
+					/etc/init.d/wifimedia_check disable
+					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
+					rm /etc/crontabs/wificode >/dev/null 2>&1
 					license_local
-				else
-					#echo "we will maintain the existing settings."
-					#echo "Wrong License Code & auto reboot" >/etc/opt/license/status
-					#enable cronjob chek key
-					echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
-					#/etc/init.d/cron restart
 				fi
 			done	
 		fi
@@ -401,12 +425,12 @@ license_local() {
 	lcs=/etc/opt/wfm_lcs
 	if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 		echo "Activated" >/etc/opt/license/status
-		#touch $status
-		echo "" >/etc/crontabs/wificode
-		/etc/init.d/cron restart	
-		rm $lcs
+		/etc/init.d/cron restart
+		rm /etc/crontabs/wificode >/dev/null 2>&1
+		rm $lcs >/dev/null 2>&1
 	else
-		echo "Wrong License Code" >/etc/opt/license/status
+		echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
+		echo "Not Activated" >/etc/opt/license/status
 	fi
 	if [ "$uptime" -gt 15 ]; then #>15days
 		if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
@@ -414,13 +438,13 @@ license_local() {
 			uci set wireless.radio1.disabled="0"
 			uci commit wireless
 			wifi
-			#touch $status
-			rm $lcs
 			echo "Activated" >/etc/opt/license/status
-			echo "" >/etc/crontabs/wificode
+			rm /etc/crontabs/wificode >/dev/null 2>&1
+			rm $lcs >/dev/null 2>&1
 			/etc/init.d/cron restart
 		else
-			echo "Wrong License Code" >/etc/opt/license/status
+			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
+			echo "Not Activated" >/etc/opt/license/status
 			uci set wireless.radio0.disabled="1"
 			uci set wireless.radio1.disabled="1"
 			uci commit wireless
@@ -473,16 +497,8 @@ fi #END RSSI
 
 }
 
-heartbeat(){
-	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
-	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
-	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	wget -q --timeout=3 \
-		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
-		 -O /dev/null
-}
-
 openvpn(){
+#$_device: aa-bb-cc-dd-ee-ff
 cfg_ovpn=/etc/openvpn/wifimedia.ovpn
 srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
 certificate=wifimedia
@@ -507,5 +523,4 @@ EOF
 		/etc/init.d/openvpn stop ${certificate}
 	fi
 }
-
 "$@"
