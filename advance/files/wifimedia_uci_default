@@ -28,7 +28,7 @@ uci -q get wifimedia.@builddate[0] || {
 	uci batch <<-EOF
 	add wifimedia builddate
 	set wifimedia.@builddate[0]=builddate
-	set wifimedia.@builddate[0].date=24/10/2019
+	set wifimedia.@builddate[0].date=14/01/2020
 	commit wifimedia
 EOF
 }
@@ -97,7 +97,7 @@ if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND
 
 	uci batch <<-EOF
 		set wireless.default_radio0.maxassoc=30
-		set wireless.@wifi-iface[0].ssid=OPENWIFI
+		set wireless.@wifi-iface[0].ssid=WIFIMEDIA.VN
 		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
 		#set wireless.@wifi-iface[0].encryption="psk2"
 		#set wireless.@wifi-iface[0].key="123456A@$rnd"
@@ -120,15 +120,29 @@ if [ "$newifi3" == "Newifi-D2" ];then
 	EOF
 
 	uci batch <<-EOF
-		set wireless.default_radio0.maxassoc=30
-		set wireless.@wifi-iface[0].ssid=OPENWIFI
-		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		#set wireless.@wifi-iface[0].encryption="psk2"
-		#set wireless.@wifi-iface[0].key="123456A@$rnd"
-		set wireless.radio0.disabled=0
+	#5G
+		set wireless.radio1.channel=157
+		#set wireless.radio1.htmode=VHT40
+		#set wireless.default_radio1.ssid="WIFIMEDIA.VN"
+		set wireless.radio0.country="US"
+		set wireless.radio1.txpower=25
+	#2.4G
+		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
+		add_list wireless.radio0.ht_capab="SHORT-GI-20"
+		add_list wireless.radio0.ht_capab="SHORT-GI-40"
+		add_list wireless.radio0.ht_capab="RX-STBC1"
+		add_list wireless.radio0.ht_capab="DSSS_CCK-40"
+		set wireless.radio0.country="US"
+		set wireless.radio0.txpower=29
+		set wireless.radio0.channel=auto
+		set wireless.default_radio0.ssid="WIFIMEDIA.VN"
+		#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
+		#set wireless.default_radio0.ssid=PDA_$rnd
+		#set wireless.default_radio0.encryption="psk2"
+		#set wireless.default_radio0.key="123456A@$rnd"
+		set wireless.default_radio0.maxassoc=30	
 		commit wireless
 	EOF
-
 fi
 
 
@@ -185,47 +199,6 @@ elif [ "$newifi3" == "Newifi-D2" ];then
 	echo "NEWIFI" >/etc/hardware	
 fi
 
-#Add vitual SSID
-#For abng
-#uci -q get wireless.@wifi-iface[1] || {
-#        uci batch <<EOF
-#        add wireless wifi-iface
-#        set wireless.@wifi-iface[1].device=radio0
-#        set wireless.@wifi-iface[1].mode=ap
-#        set wireless.@wifi-iface[1].network=lan
-#        set wireless.@wifi-iface[1].ssid=OPENWIFIx2
-#		set wireless.@wifi-iface[1].disabled=1
-#        commit wireless
-#EOF
-#}
-
-
-uci batch <<-EOF
-	set wireless.radio1.channel=157
-	#set wireless.radio1.htmode=VHT40
-	#set wireless.default_radio1.ssid="VIETNAM POST"
-	set wireless.radio0.country="US"
-	set wireless.radio1.txpower=25
-#5G
-	set wireless.default_radio0.ssid="OPENWIFI"
-	#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
-
-	#set wireless.default_radio0.maxassoc=30
-	set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
-	add_list wireless.radio0.ht_capab="SHORT-GI-20"
-	add_list wireless.radio0.ht_capab="SHORT-GI-40"
-	add_list wireless.radio0.ht_capab="RX-STBC1"
-	add_list wireless.radio0.ht_capab="DSSS_CCK-40"
-	set wireless.radio0.country="US"
-	set wireless.radio0.txpower=29
-	set wireless.radio0.channel=auto
-	commit wireless
-EOF
-#enable wifi
-uci set wireless.radio0.disabled="0"
-uci commit wireless
-wifi
-#for hwmode n ac
 uci batch <<-EOF
 	delete network.wan6
 	commit network
@@ -336,13 +309,6 @@ uci batch <<-EOF
 	commit wifimedia
 EOF
 
-#uci batch <<-EOF
-#	del openvpn.@openvpn[0]
-#	del openvpn.@openvpn[1]
-#	del openvpn.@openvpn[2]
-#	del openvpn.@openvpn[3]
-#	commit openvpn
-#EOF
 echo "" >/etc/config/openvpn
 source /etc/openwrt_release
 rm -f /etc/openwrt_release
