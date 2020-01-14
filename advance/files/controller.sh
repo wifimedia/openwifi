@@ -130,7 +130,7 @@ cat $response_file | while read line ; do
 		fi	
 	##Map SSID to net/plain LAN or WAN	
 	elif [ "$key" = "wireless.network5G" ];then
-		uci set wireless.default_radio0.network="$value"
+		uci set wireless.default_radio1.network="$value"
 	#Set Max Client	
 	elif [ "$key" = "wireless.maxclients5G" ];then
 		uci set wireless.default_radio1.maxassoc="$value"
