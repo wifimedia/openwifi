@@ -34,7 +34,7 @@ touch /tmp/scheduled_flag
 touch /tmp/clientdetect
 local key
 local value
-cat "/tmp/wifimedia" | while read line ; do
+cat $response_file | while read line ; do
 	key=$(echo $line | cut -f 1 -d =)
 	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
 	
@@ -55,6 +55,7 @@ cat "/tmp/wifimedia" | while read line ; do
 	elif [ "$key" = "wireless.radio2G.channel" ];then
 		uci set wireless.radio0.channel="$value"
 	elif [ "$key" = "wireless.radio2G.htmode" ];then
+		value=$(echo $value | tr a-z A-Z)
 		uci set wireless.radio0.htmode="$value"
 	elif [ "$key" = "wireless.radio2G.txpower" ];then
 		uci set wireless.radio0.txpower="$value"
@@ -96,6 +97,7 @@ cat "/tmp/wifimedia" | while read line ; do
 	elif [ "$key" = "wireless.radio5G.channel" ];then
 		uci set wireless.radio1.channel="$value"
 	elif [ "$key" = "wireless.radio5G.htmode" ];then
+		value=$(echo $value | tr a-z A-Z)
 		uci set wireless.radio1.htmode="$value"
 	elif [ "$key" = "wireless.radio5G.txpower" ];then
 		uci set wireless.radio1.txpower="$value"
@@ -160,18 +162,17 @@ cat "/tmp/wifimedia" | while read line ; do
 			uci set wifimedia.@switchmode[0].switch_port="0"
 			uci commit			
 		fi
-	#Cu hinh IP LAN/WAN
+	#Cu hinh IP LAN
 	elif [ "$key" = "network.lan.static" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.lan >/dev/null 2>&1
+		uci set network.lan="interface"
+		uci set network.lan.type="bridge"	
+		uci set network.lan.ifname="eth0.1"
 		if [ "$value" = "1" ];then ##Static 
-			uci set network.lan="interface"
-			uci set network.lan.proto="static"
-			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth0.1"		
+			uci set network.lan.proto="static"	
 		else ##DHCP Client nhan IP
-			uci delete network.lan
-			uci set network.lan.proto="dhcp"
-			uci set network.lan.ifname="eth0.1"		
+			uci set network.lan.proto="dhcp"	
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -185,25 +186,24 @@ cat "/tmp/wifimedia" | while read line ; do
 	###WAN config
 	elif [ "$key" = "network.wan.static" ];then
 		echo 1 >/tmp/network_flag
+		uci delete network.wan >/dev/null 2>&1
+		uci set network.wan="interface"
+		uci set network.wan.type="bridge"	
+		uci set network.wan.ifname="eth0.2"				
 		if [ "$value" = "1" ];then ##Static 
-			uci set network.wan="interface"
 			uci set network.wan.proto="static"
-			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth0.2"		
 		else ##DHCP Client nhan IP
-			uci delete network.wan
-			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0.2"		
+			uci set network.wan.proto="dhcp"	
 		fi
-	elif [  "$key" = "network.lan.ip" ];then
-		uci set network.lan.ipaddr="$value"
-	elif [  "$key" = "network.lan.subnetmask" ];then
-		uci set network.lan.netmask="$value"
-	elif [  "$key" = "network.lan.gateway" ];then
-		uci set network.lan.gateway="$value"		
-	elif [  "$key" = "network.lan.dns" ];then
+	elif [  "$key" = "network.wan.ip" ];then
+		uci set network.wan.ipaddr="$value"
+	elif [  "$key" = "network.wan.subnetmask" ];then
+		uci set network.wan.netmask="$value"
+	elif [  "$key" = "network.wan.gateway" ];then
+		uci set network.wan.gateway="$value"		
+	elif [  "$key" = "network.wan.dns" ];then
 		value=$(echo $value | sed 's/,/ /g')
-		uci set network.lan.dns="$value"		
+		uci set network.wan.dns="$value"		
 	##Cau hinh DHCP
 	elif [  "$key" = "network.dhcp.start" ];then
 		uci set dhcp.lan.start="$value"
