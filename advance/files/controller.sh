@@ -17,7 +17,7 @@ ip_public(){
 wr940v5() { #checking internet
 
 	#check gateway
-	ping -c 3 "$gateway" > /dev/null
+	ping -c 2 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
 		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
 	else
@@ -25,7 +25,7 @@ wr940v5() { #checking internet
 	fi
 	
 	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
+	ping -c 2 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
 		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
 	else
@@ -37,7 +37,7 @@ wr940v5() { #checking internet
 wr940v6() { #checking internet
 
 	#check gateway
-	ping -c 3 "$gateway" > /dev/null
+	ping -c 2 "$gateway" > /dev/null
 	if [ $? -eq "0" ];then
 		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
 	else
@@ -46,7 +46,7 @@ wr940v6() { #checking internet
 	fi
 	
 	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
+	ping -c 2 "8.8.8.8" > /dev/null
 	if [ $? -eq "0" ];then
 		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
 	else
