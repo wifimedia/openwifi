@@ -12,9 +12,12 @@ blacklist="http://firmware.wifimedia.com.vn/blacklist"
 url_fw="http://firmware.wifimedia.com.vn/tplink/$board_name.bin"
 device=$(cat /sys/class/ieee80211/phy0/macaddress | sed 's/:/-/g' | tr a-z A-Z)
 apid=$(echo $device | sed 's/:/-/g')
+#for device wlan
+_device=`cat /sys/class/ieee80211/phy0/macaddress | sed 's/:/-/g' | tr a-z A-Z`
+global_device=`cat /sys/class/ieee80211/phy0/macaddress| tr a-z A-Z` #Detect Client Connect Nextify
 
-_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
-global_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| tr a-z A-Z` #Detect Client Connect Nextify
+#_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+#global_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| tr a-z A-Z` #Detect Client Connect Nextify
 #--------------RSSI------------------------------
 rssi_on=$(uci -q get wifimedia.@advance[0].enable)
 #---------------controller online----------------

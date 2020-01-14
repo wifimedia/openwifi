@@ -27,7 +27,7 @@ checkinterval_default=${checkinterval:-10}
 ctv=`expr $checkinterval_default \* 60`
 https=`uci -q get wifimedia.@nodogsplash[0].https`
 facebook=`uci -q get wifimedia.@nodogsplash[0].facebook`
-MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+MAC_E0=$(cat /sys/class/ieee80211/phy0/macaddress | tr a-z A-Z )
 nds_status=`uci -q get nodogsplash.@nodogsplash[0].enabled`
 heartbeat_url=`uci -q get wifimedia.@nodogsplash[0].heartbeat`
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
@@ -161,7 +161,7 @@ get_captive_portal_clients() {
      local activity_timestamp=
      local traffic_download=
      local traffic_upload=
-	 local global_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
+	 local global_device=`cat /sys/class/ieee80211/phy0/macaddress | tr a-z A-Z`
      # erzwinge eine leere Zeile am Ende fuer die finale Ausgabe des letzten Clients
      (ndsctl clients; echo) | while read line; do
          key=$(echo "$line" | cut -f 1 -d =)

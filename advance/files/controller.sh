@@ -323,7 +323,7 @@ srv(){
 token(){
 	#token = sha256(mac+secret)
 	secret="(C)WifiMedia2019"
-	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
+	mac_device=`cat /sys/class/ieee80211/phy0/macaddress | tr a-z A-Z| sed 's/:/-/g'`
 	key=${mac_device}${secret}
 	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
 }
@@ -379,7 +379,7 @@ _post_clients(){ #$global_device: aa:bb:cc:dd:ee:ff
 }
 
 _get_server(){ # Connect to server Nextify
-	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	MAC=$(cat /sys/class/ieee80211/phy0/macaddress | tr a-z A-Z)
 	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
 	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
 	wget -q --timeout=3 \
