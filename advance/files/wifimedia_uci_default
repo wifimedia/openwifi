@@ -21,7 +21,7 @@ uci -q get wifimedia.@builddate[0] || {
 	uci batch <<-EOF
 	add wifimedia builddate
 	set wifimedia.@builddate[0]=builddate
-	set wifimedia.@builddate[0].date=30/12/2019
+	set wifimedia.@builddate[0].date=14/01/2020
 	commit wifimedia
 EOF
 }
@@ -120,7 +120,7 @@ if [ "$newifi3" == "Newifi-D2" ];then
 		set wireless.radio1.country="US"
 		set wireless.radio1.txpower=25
 	#2G
-		set wireless.default_radio0.ssid="FUTA Bus Lines"
+		set wireless.default_radio0.ssid="WIFIMEDIA.VN"
 		#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
 		#set wireless.default_radio0.maxassoc=30
 		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
