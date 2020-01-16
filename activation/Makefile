@@ -45,7 +45,7 @@ define Package/gwls/install
 	
 	$(INSTALL_BIN) ./files/license_uci $(1)/etc/uci-defaults/license
 	$(INSTALL_BIN) ./files/license.sh $(1)/usr/bin/license.sh
-	$(INSTALL_BIN) ./files/initd_wifimedia_check $(1)/etc/init.d/wifimedia_check
+	#$(INSTALL_BIN) ./files/initd_wifimedia_check $(1)/etc/init.d/wifimedia_check
 endef
 
 define Package/gwls/postinst
