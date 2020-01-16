@@ -52,7 +52,7 @@ config_captive_portal() {
 		uci set nodogsplash.@nodogsplash[0].sessiontimeout="$sessiontimeout_default";
 		uci set nodogsplash.@nodogsplash[0].checkinterval="$ctv";
 		# Whitelist IP
-		for i in portal.nextify.vn static.nextify.vn nextify.vn crm.nextify.vn googletagmanager.com portal.wifioto.net wifioto.net $domain $walledgadent; do
+		for i in portal.nextify.vn static.nextify.vn nextify.vn nextify.co crm.nextify.vn googletagmanager.com portal.wifioto.net wifioto.net $domain $walledgadent; do
 			nslookup ${i} 8.8.8.8 2> /dev/null | \
 				grep 'Address ' | \
 				grep -v '127\.0\.0\.1' | \
@@ -78,6 +78,7 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].authenticated_users >/dev/null 2>&1
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all" >/dev/null 2>&
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 192.168.5.1" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1" >/dev/null 2>&1
 		uci commit
