@@ -16,7 +16,6 @@ boot() {
     #    	sleep 1
     #	fi
 	#done
-	ifup wan && ifup lan
 	/sbin/wifimedia/controller.sh _boot
 }
 
