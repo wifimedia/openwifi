@@ -90,8 +90,8 @@ if [ "$newifi3" == "Newifi-D2" ];then
 	uci batch <<-EOF
 	#5G
 		set wireless.radio1.channel=157
-		#set wireless.radio1.htmode=VHT40
-		#set wireless.default_radio1.ssid="WIFIMEDIA.VN"
+		set wireless.radio1.htmode=VHT40
+		set wireless.default_radio1.ssid="WIFIMEDIA.VN"
 		set wireless.radio0.country="US"
 		set wireless.radio1.txpower=25
 	#2.4G
