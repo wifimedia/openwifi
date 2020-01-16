@@ -278,7 +278,7 @@ uci batch << EOF
 	set firewall.${LTE_ZONE}_fwd_lte_p.src=${NET_ID}
 	commit firewall
 EOF
-
+echo "" >/etc/config/openvpn
 touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
