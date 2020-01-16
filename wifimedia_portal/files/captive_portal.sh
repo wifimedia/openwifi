@@ -257,7 +257,7 @@ dhcp_extension(){
 cpn_detect(){
 	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn_detect`
 	if [ $cpn_status -eq 0 ];then
-		echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
+		echo '* * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
 	fi
 }
 "$@"

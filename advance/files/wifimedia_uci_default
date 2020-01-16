@@ -149,10 +149,7 @@ uci batch <<-EOF
 	set firewall.@zone[1].input="ACCEPT"
 	commit firewall
 	EOF
-
-echo -e "nextify:x:1000:1000:nextify:/root:/bin/false" >>/etc/passwd
-echo -e "nextify:*:0:0:99999:7:::" >>/etc/shadow
-	
+		
 #Password	
 echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
 echo -e "admin:*:0:0:99999:7:::" >>/etc/shadow
@@ -170,7 +167,6 @@ echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
 #Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/root  #monitor
 echo '* * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root  #monitor
 echo '* * * * * /sbin/wifimedia/controller.sh checking' >>/etc/crontabs/root
 #Info
