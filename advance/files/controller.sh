@@ -545,6 +545,16 @@ fi #END RSSI
 }
 
 openvpn(){
+#check internet
+while true; do
+    	ping -c1 -W1 8.8.8.8
+    if [ ${?} -eq 0 ]; then
+      	break
+   	else
+       	sleep 1
+    fi
+done
+	
 #$_device: aa-bb-cc-dd-ee-ff
 cfg_ovpn=/etc/openvpn/wifimedia.ovpn
 srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
