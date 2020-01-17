@@ -248,6 +248,7 @@ if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
 	echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
 	/etc/init.d/cron restart
+	rm /tmp/cpn_flag
 else
   echo "Stop CPN"
   /etc/init.d/nodogsplash stop
@@ -255,6 +256,7 @@ fi
 if [ $(cat /tmp/clientdetect) -eq 1 ]; then
 	echo "restarting conjob"
 	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
+	rm /tmp/clientdetect
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
@@ -309,7 +311,8 @@ srv(){
 		echo "WARNING: Could not checkin to the dashboard."
 		exit
 	fi
-	start_cfg	
+	start_cfg
+	
 }
 token(){
 	#token = sha256(mac+secret)
