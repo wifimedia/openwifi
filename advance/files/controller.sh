@@ -564,11 +564,11 @@ if [ $rssi_on == "1" ];then
 	/tmp/denyclient
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
-
+}
 openvpn(){
 #check internet
 while true; do
-    	ping -c1 -W1 8.8.8.8
+    ping -c6 -W1 8.8.8.8 >/dev/null
     if [ ${?} -eq 0 ]; then
       	break
    	else
