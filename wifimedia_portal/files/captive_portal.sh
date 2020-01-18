@@ -83,14 +83,11 @@ config_captive_portal() {
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1" >/dev/null 2>&1
 		uci commit
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
 		if [ -z "$inf" ];then #neu khong co int thi
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
 			uci set wifimedia.@nodogsplash[0].network="hotspot"
-			uci set wireless.default_radio0.network="hotspot"			
-		else
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
-			uci set wifimedia.@nodogsplash[0].network="lan"
+			uci set wireless.default_radio0.network="hotspot"
 		fi
 
 		if network_get_ipaddr addr "wan"; then
@@ -262,19 +259,21 @@ write_login(){
 }
 
 dhcp_extension(){
+	uci del network.local.network
+	uci set network.local=interface
+	uci set network.local.proto="relay"
 	relay=`uci -q get network.local`
 	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-	uci del network.local.network
-	if [ $relay != "" ];then
-		if [ $NET_ID = "hotspot" ];then
+	if [ $relay != "" ] || [ $relay = "1" ];then
+		if [ $networkncpn = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
 		else
 			uci set network.local.ipaddr=$ip_lan_gw
 		fi
-		uci add_list network.local.network=$NET_ID
-		uci set dhcp.$NET_ID.ignore='1'
-		uci set wireless.default_radio0.network=$NET_ID
-		uci set wireless.default_radio1.network=$NET_ID		
+		uci add_list network.local.network=$networkncpn
+		uci set dhcp.$networkncpn.ignore='1'
+		uci set wireless.default_radio0.network=$networkncpn
+		uci set wireless.default_radio1.network=$networkncpn		
 		uci add_list network.local.network='wan'
 	else
 
