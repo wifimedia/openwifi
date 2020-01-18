@@ -149,35 +149,36 @@ captive_portal_restart(){
 	fi
 }
 
-#check_dns(){
-#    dns_nextify=`echo $domain_default | cut -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17`
-#	_flag=`cat /tmp/dns_nextify`		 
-#	for i in $dns_nextify; do
-#		nslookup ${i} 8.8.8.8 2> /dev/null | \
-#			grep 'Address ' | \
-#			grep -v '127\.0\.0\.1' | \
-#			grep -v '8\.8\.8\.8' | \
-#			grep -v '0\.0\.0\.0' | \
-#			awk '{print $3}' | \
-#			grep -v ':' >> ${NEXTIFY_ADDRS}
-#	done
-#	
-#	while read line; do
-#		ping -c 2 "$line" >/dev/null
-#		if [ $? -eq "0" ];then
-#			wget -q --timeout=3 \
-#				"http://api.nextify.co/check_portal?site=$dns_nextify" -O /tmp/dns_nextify
-#			if [ $_flag -eq 0 ];then
-#				uci set nodogsplash.@nodogsplash[0].enabled=1
-#				/etc/init.d/nodogsplash stop >/dev/null
-#			else
-#			
-#			fi
-#		else
-#			echo $i":false" >>/tmp/diagnostics_log
-#		fi	
-#	done <$NEXTIFY_ADDRS	
-#}
+_nextify_service(){
+
+    domain_nextify=`echo $domain_default | cut -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17`
+	flag_dns=/tmp/nextify_dns
+	_flag=`cat $flag_dns`		 
+	wget -q --timeout=3 \
+		"http://api.nextify.co/check_portal?site=$domain_nextify" -O $flag_dns
+	if [ $? -eq "0" ];then
+		if [ $_flag -eq 1 ];then
+			#dich vu nextify dang chay
+			#nodogsplash dang chay
+			ndsctl status > /tmp/ndsctl_status.txt
+			if [ $? -eq 0 ]; then
+				exit;
+			else
+				#nodogsplash khong chay thi start lai
+				uci set nodogsplash.@nodogsplash[0].enabled='1'
+				uci commit
+				/etc/init.d/nodogsplash start
+			fi
+		else
+		#dich vu next bi tat thi cho tat luon chuong trinh nodogsplash
+			/etc/init.d/nodogsplash stop
+			uci set nodogsplash.@nodogsplash[0].enabled='0'
+			uci commit
+			
+		fi	
+	fi
+}
+
 heartbeat(){
 	captive_portal_restart
 }
