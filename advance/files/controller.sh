@@ -250,8 +250,12 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "cpn.dhcpextenal" ];then
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 	elif [  "$key" = "cpn.clientdetect" ];then
-		uci set wifimedia.@nodogsplash[0].cpn="$value"
-		echo $value >/tmp/clientdetect
+		uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
+		if [ "$value" = "1" ];then
+			crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
+		else
+			echo ''>/etc/crontabs/nds && /etc/init.d/cron restart
+		fi	
 	#Cau hinh auto reboot
 	elif [  "$key" = "scheduletask.enable" ];then
 		echo $value >/tmp/scheduled_flag
@@ -276,11 +280,6 @@ if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 else
   echo "Stop CPN"
   /etc/init.d/nodogsplash stop
-fi
-if [ $(cat /tmp/clientdetect) -eq 1 ]; then
-	echo "restarting conjob"
-	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
-	rm /tmp/clientdetect
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
