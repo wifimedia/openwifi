@@ -249,6 +249,8 @@ cat $response_file | while read line ; do
 		uci set wifimedia.@nodogsplash[0].facebook="$value"
 	elif [  "$key" = "cpn.dhcpextenal" ];then
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
+		uci commit
+		/sbin/wifimedia/captive_portal.sh dhcp_extension
 	elif [  "$key" = "cpn.clientdetect" ];then
 		uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
 		if [ "$value" = "1" ];then
