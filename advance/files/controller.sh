@@ -8,7 +8,9 @@ touch $diag_file
 touch /tmp/ports
 touch /tmp/client_connect_wlan
 touch /tmp/diagnostics_log
-
+cfg_ovpn=/etc/openvpn/wifimedia.ovpn
+srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
+certificate=wifimedia
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	#echo $PUBLIC_IP
@@ -211,7 +213,28 @@ cat $response_file | while read line ; do
 		uci set dhcp.lan.limit="$value"
 	elif [  "$key" = "network.dhcp.leasetime" ];then
 		uci set dhcp.lan.leasetime="$value"
-		
+	elif [  "$key" = "network.4glte" ];then
+		echo 1 >/tmp/network_flag
+		if [ "$value" = "1" ];then
+			uci set network.lte="interface"
+			uci set network.lte.proto="dhcp"
+			uci set network.lte.type="bridge"
+			uci set network.lte.ifname="eth1"
+			uci set wifimedia.@lte[0].4glte=1
+			echo 1 >/sys/class/gpio/power_usb3/value
+		else
+			uci delete network.lte
+			uci set wifimedia.@lte[0].4glte=0
+			echo 0 >/sys/class/gpio/power_usb3/value #Tat usb
+		fi	
+	#Open VPN
+	elif [  "$key" = "network.openvpn" ];then
+		if [ "$value" = "1" ];then
+			openvpn
+		else
+		 #Tat openvpn wifimedia
+		 /etc/init.d/openvpn stop ${certificate}
+		fi
 	#Cau hinh Captive Portal
 	elif [  "$key" = "cpn.enable" ];then
 		echo $value >/tmp/cpn_flag
@@ -542,8 +565,6 @@ if [ $rssi_on == "1" ];then
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
 
-}
-
 openvpn(){
 #check internet
 while true; do
@@ -556,9 +577,6 @@ while true; do
 done
 	
 #$_device: aa-bb-cc-dd-ee-ff
-cfg_ovpn=/etc/openvpn/wifimedia.ovpn
-srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
-certificate=wifimedia
 uci -q get openvpn.@$certificate[0] || {
 uci batch <<-EOF
 	add openvpn $certificate
@@ -575,8 +593,6 @@ EOF
 		uci commit openvpn
 		/etc/init.d/openvpn start ${certificate}
 	else
-		uci set openvpn.${certificate}.enabled="1"
-		uci commit openvpn
 		/etc/init.d/openvpn stop ${certificate}
 	fi
 }
