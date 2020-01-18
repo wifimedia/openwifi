@@ -174,10 +174,9 @@ _nextify_service(){
 			fi
 		else
 		#dich vu next bi tat thi cho tat luon chuong trinh nodogsplash
-			/etc/init.d/nodogsplash stop
 			uci set nodogsplash.@nodogsplash[0].enabled='0'
 			uci commit
-			
+			/etc/init.d/firewall restart
 		fi	
 	fi
 }
