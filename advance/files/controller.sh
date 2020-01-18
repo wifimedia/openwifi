@@ -309,11 +309,11 @@ _lic(){
 _nds(){ #Status Captive Portal
 	nodogsplash=`pidof nodogsplash`
 	if [ -z $nodogsplash ];then
-		_cpn="off"
+		_cpn="Offline"
 		echo $_cpn
 		
 	else
-		_cpn="on"
+		_cpn="Online"
 		echo $_cpn
 	fi
 }
