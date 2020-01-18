@@ -279,12 +279,12 @@ if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	rm /tmp/cpn_flag
 else
   echo "Stop CPN"
-  /etc/init.d/nodogsplash stop
+  service firewall restart
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
-	/etc/init.d/network restart
+	service network restart
 	rm /tmp/network_flag
 	echo "WIFI Online"
 fi
