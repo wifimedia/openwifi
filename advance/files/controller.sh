@@ -306,6 +306,18 @@ _lic(){
 	license_srv
 }
 
+_nds(){ #Status Captive Portal
+	nodogsplash=`pidof nodogsplash`
+	if [ -z $nodogsplash ];then
+		_cpn="off"
+		echo $_cpn
+		
+	else
+		_cpn="on"
+		echo $_cpn
+	fi
+}
+
 srv(){
 	token
 	monitor_port
