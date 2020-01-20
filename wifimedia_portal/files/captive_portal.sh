@@ -87,9 +87,6 @@ config_captive_portal() {
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
 			uci set wifimedia.@nodogsplash[0].network="hotspot"
 			uci set wireless.default_radio0.network="hotspot"			
-		else
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
-			uci set wifimedia.@nodogsplash[0].network="lan"
 		fi
 
 		if network_get_ipaddr addr "wan"; then
