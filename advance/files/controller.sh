@@ -253,6 +253,7 @@ fi
 if [ $(cat /tmp/clientdetect) -eq 1 ]; then
 	echo "restarting conjob"
 	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
+	rm /tmp/clientdetect
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
@@ -280,11 +281,11 @@ _lic(){
 _nds(){ #Status Captive Portal
 	nodogsplash=`pidof nodogsplash`
 	if [ -z $nodogsplash ];then
-		_cpn="off"
+		_cpn="Offline"
 		echo $_cpn
 		
 	else
-		_cpn="on"
+		_cpn="Online"
 		echo $_cpn
 	fi
 }
