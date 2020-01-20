@@ -262,9 +262,8 @@ dhcp_extension(){
 	uci del network.local.network
 	uci set network.local=interface
 	uci set network.local.proto="relay"
-	relay=`uci -q get network.local`
-	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-	if [ $relay != "" ];then
+	dhcpextenition=`uci -q get wifimedia.@nodogsplash[0].dhcpextension`
+	if [ $dhcpextenition -eq 1 ];then
 		if [ $networkncpn = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
 		else
@@ -277,8 +276,8 @@ dhcp_extension(){
 		uci add_list network.local.network='wan'
 	else
 
-		uci set wireless.default_radio0.network=$NET_ID
-		uci set dhcp.$NET_ID.ignore='0'
+		uci set wireless.default_radio0.network=$networkncpn
+		uci set dhcp.$networkncpn.ignore='0'
 	fi
 	uci commit && wifi up
 }

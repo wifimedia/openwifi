@@ -209,6 +209,7 @@ cat $response_file | while read line ; do
 	##Cau hinh DHCP
 	elif [  "$key" = "network.dhcp.start" ];then
 		uci set dhcp.lan.start="$value"
+		uci set dhcp.lan.force="1"
 	elif [  "$key" = "network.dhcp.limit" ];then
 		uci set dhcp.lan.limit="$value"
 	elif [  "$key" = "network.dhcp.leasetime" ];then
