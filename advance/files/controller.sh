@@ -367,9 +367,9 @@ diagnostics(){
 	for i in $ip; do
 		ping -c 2 "$i" >/dev/null
 		if [ $? -eq "0" ];then
-			echo $i":success" >>/tmp/diagnostics_log
+			echo $i":Success" >>/tmp/diagnostics_log
 		else
-			echo $i":false" >>/tmp/diagnostics_log
+			echo $i":False" >>/tmp/diagnostics_log
 		fi
 	done
 	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
