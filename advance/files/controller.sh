@@ -280,11 +280,11 @@ _lic(){
 _nds(){ #Status Captive Portal
 	nodogsplash=`pidof nodogsplash`
 	if [ -z $nodogsplash ];then
-		_cpn="off"
+		_cpn="Offline"
 		echo $_cpn
 		
 	else
-		_cpn="on"
+		_cpn="Online"
 		echo $_cpn
 	fi
 }
@@ -332,11 +332,11 @@ diagnostics(){
 	ip=`cat $diag_file`
 
 	for i in $ip; do
-		ping -c 3 "$i" >/dev/null
+		ping -c 2 "$i" >/dev/null
 		if [ $? -eq "0" ];then
-			echo $i":success" >>/tmp/diagnostics_log
+			echo $i":Success" >>/tmp/diagnostics_log
 		else
-			echo $i":false" >>/tmp/diagnostics_log
+			echo $i":False" >>/tmp/diagnostics_log
 		fi
 	done
 	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
