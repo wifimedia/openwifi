@@ -86,10 +86,7 @@ config_captive_portal() {
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
 			uci set wifimedia.@nodogsplash[0].network="hotspot"
-			uci set wireless.default_radio0.network="hotspot"			
-		else
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
-			uci set wifimedia.@nodogsplash[0].network="lan"
+			uci set wireless.default_radio0.network="hotspot"
 		fi
 		if network_get_ipaddr addr "wan"; then
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
@@ -237,9 +234,11 @@ write_login(){
 }
 
 dhcp_extension(){
+	uci del network.local.network
+	uci set network.local=interface
+	uci set network.local.proto="relay"
 	relay=`uci -q get network.local`
 	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-	uci del network.local.network
 	if [ $relay != "" ];then
 		if [ $NET_ID = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
