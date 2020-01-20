@@ -264,7 +264,7 @@ dhcp_extension(){
 	uci set network.local.proto="relay"
 	relay=`uci -q get network.local`
 	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-	if [ $relay != "" ] || [ $relay = "1" ];then
+	if [ $relay != "" ];then
 		if [ $networkncpn = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
 		else
