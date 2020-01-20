@@ -260,27 +260,29 @@ write_login(){
 }
 
 dhcp_extension(){
-	relay=`uci -q get network.local`
-	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
 	uci del network.local.network
-	if [ $relay != "" ];then
-		if [ $NET_ID = "hotspot" ];then
+	uci set network.local=interface
+	uci set network.local.proto="relay"
+	dhcpextenition=`uci -q get wifimedia.@nodogsplash[0].dhcpextension`
+	if [ $dhcpextenition -eq 1 ];then
+		if [ $networkncpn = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
 		else
 			uci set network.local.ipaddr=$ip_lan_gw
 		fi
-		uci add_list network.local.network=$NET_ID
-		uci set dhcp.$NET_ID.ignore='1'
-		uci set wireless.default_radio0.network=$NET_ID
-		uci set wireless.default_radio1.network=$NET_ID		
+		uci add_list network.local.network=$networkncpn
+		uci set dhcp.$networkncpn.ignore='1'
+		uci set wireless.default_radio0.network=$networkncpn
+		uci set wireless.default_radio1.network=$networkncpn		
 		uci add_list network.local.network='wan'
 	else
 
-		uci set wireless.default_radio0.network=$NET_ID
-		uci set dhcp.$NET_ID.ignore='0'
+		uci set wireless.default_radio0.network=$networkncpn
+		uci set dhcp.$networkncpn.ignore='0'
 	fi
 	uci commit && wifi up
 }
+
 cpn_detect(){
 	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn_detect`
 	if [ $cpn_status -eq 0 ];then
