@@ -258,9 +258,11 @@ write_login(){
 }
 
 dhcp_extension(){
+	uci del network.local.network
+	uci set network.local=interface
+	uci set network.local.proto="relay"
 	relay=`uci -q get network.local`
 	NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-	uci del network.local.network
 	if [ $relay != "" ];then
 		if [ $NET_ID = "hotspot" ];then
 			uci set network.local.ipaddr=$ip_hotspot_gw
