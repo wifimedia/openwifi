@@ -276,7 +276,7 @@ uci commit
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start Captive Portal" 
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
+	echo '* * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds
 	/etc/init.d/cron restart
 	rm /tmp/cpn_flag
 else
