@@ -245,10 +245,12 @@ if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start CPN" 
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
 	echo '* * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds
+	/etc/init.d/nodogsplash enable
 	/etc/init.d/cron restart
 else
   echo "Stop CPN"
   /etc/init.d/nodogsplash stop
+  /etc/init.d/nodogsplash disable
 fi
 if [ $(cat /tmp/clientdetect) -eq 1 ]; then
 	echo "restarting conjob"
