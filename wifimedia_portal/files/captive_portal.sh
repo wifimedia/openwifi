@@ -56,7 +56,7 @@ config_captive_portal() {
 		for i in portal.nextify.vn portal.nextify.co static.nextify.vn nextify.vn crm.nextify.vn googletagmanager.com wifimedia.vn portal.wifioto.net wifioto.net $domain $walledgadent; do
 			nslookup ${i} 8.8.8.8 2> /dev/null | \
 				grep 'Address ' | \
-				grep -v '127\.0\.0\.1' | \ 
+				grep -v '127\.0\.0\.1' | \
 				grep -v '8\.8\.8\.8' | \
 				grep -v '0\.0\.0\.0' | \
 				awk '{print $3}' | \
