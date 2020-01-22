@@ -239,31 +239,37 @@ cat $response_file | while read line ; do
 ##
 done	
 uci commit
-if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
-	echo "restarting the node"
-	reboot
-fi
 
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
-	echo "Config & Start CPN" 
+	echo "Config & Start Captive Portal" 
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	echo '*/5 * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds
+	echo '* * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds
+	/etc/init.d/nodogsplash enable
 	/etc/init.d/cron restart
+	rm /tmp/cpn_flag
 else
-  echo "Stop CPN"
-  /etc/init.d/nodogsplash stop
+  echo "Stop Captive Portal"
+  /etc/init.d/nodogsplash disable
+  service firewall restart
 fi
+
 if [ $(cat /tmp/clientdetect) -eq 1 ]; then
 	echo "restarting conjob"
 	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
+	rm /tmp/clientdetect
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
-	/etc/init.d/network restart
-	#echo "WIFI online"
+	service network restart
+	rm /tmp/network_flag
+	echo "WIFI Online"
 fi
-	
+
+if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
+	echo "restarting the node"
+	 sleep 5 && reboot
+fi	
 }
 
 _nds(){ #Status Captive Portal
