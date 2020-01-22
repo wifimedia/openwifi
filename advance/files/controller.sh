@@ -286,6 +286,12 @@ else
   service firewall restart
 fi
 
+if [ $(cat /tmp/clientdetect) -eq 1 ]; then
+	echo "restarting conjob"
+	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
+	rm /tmp/clientdetect
+fi
+
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	service network restart
@@ -296,7 +302,7 @@ fi
 if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
 	echo "restarting the node"
 	 sleep 5 && reboot
-fi
+fi	
 }
 
 _boot(){
