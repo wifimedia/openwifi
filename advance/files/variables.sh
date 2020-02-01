@@ -3,7 +3,7 @@
 # All rights reserved.
 
 gateway=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }')
-
+model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-18)
 #------------License srv checking-----------------
 licensekey=/tmp/upgrade/licensekey
 code_srv="http://firmware.wifimedia.com.vn/hardware_active"
