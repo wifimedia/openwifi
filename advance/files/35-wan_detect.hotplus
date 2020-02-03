@@ -19,8 +19,8 @@ mac_lan=$(ifconfig br-lan | grep 'HWaddr' | awk '{ print $5 }')
 mac_wan=$(ifconfig br-wan | grep 'HWaddr' | awk '{ print $5 }')
 mac_wlan=$(cat /sys/class/ieee80211/phy0/macaddress)
 
-ip_lan="192.168.$(hex_ip 16-17).1"
-ip_lan_block="192.168.$(hex_ip 16-17).0"
+ip_lan="172.16.$(hex_ip 16-17).1"
+ip_lan_block="172.16.$(hex_ip 16-17).0"
 ip_dhcp=$(ifconfig br-wan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 ip_gateway=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }')
 net_wan=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }' | cut -c 1-9).0
