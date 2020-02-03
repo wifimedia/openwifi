@@ -92,6 +92,11 @@ cat $response_file | while read line ; do
 	#Reboot device	
 	elif [ "$key" = "device.reboot" ];then
 		echo $value >/tmp/reboot_flag
+	#Reset defaults	
+	elif [ "$key" = "device.factoryreset" ];then
+		if [ "$value" =  "1" ];then
+			jffs2reset -y && reboot
+		fi		
 	#Cau hinh wireless 2.4
 	elif [ "$key" = "wireless.radio2G.enable" ];then
 		echo 1 >/tmp/network_flag
