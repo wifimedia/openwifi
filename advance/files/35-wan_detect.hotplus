@@ -37,4 +37,3 @@ echo "${ip_dhcp} $mac_wlan.wifimedia.vn" >> /etc/hosts
 echo "$ip_gateway local.wifimedia.vn" >> /etc/hosts
 /sbin/wifimedia/controller.sh license_srv
 /sbin/wifimedia/controller.sh srv #Sent data to server monitot
-#/etc/init.d/network restart
