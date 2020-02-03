@@ -7,9 +7,8 @@ cab_detect=`cat /sys/class/net/$(uci get network.wan.ifname)/carrier`
 if [ $cab_detect -eq 0 ];then
 	ping -c 3 8.8.8.8 > /dev/null
 	if [ $? -eq "0" ]; then
-		echo timer > /sys/devices/platform/leds-gpio/leds/tp-link:green:wan/trigger
-		#echo 100 > /sys/devices/platform/leds-gpio/leds/tp-link:green:wan/delay_on
-		#echo 150 > /sys/devices/platform/leds-gpio/leds/tp-link:green:wan/delay_off
+		echo 1 >/sys/devices/platform/leds/leds/tl-wr840n-v6:green:wan/brightness
+		echo 1 >/sys/devices/platform/leds/leds/tl-wr840n-v6:orange:wan/brightness
 	else
 		/etc/init.d/led reload
 	fi
