@@ -53,12 +53,9 @@ uci -q get wifimedia.@nodogsplash[0] || {
         add wifimedia nodogsplash
 		    set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
 		    set wifimedia.@nodogsplash[0].https=0
-		    set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
         commit wifimedia
 EOF
 }
-uci set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
-uci commit wifimedia
 
 /etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'
