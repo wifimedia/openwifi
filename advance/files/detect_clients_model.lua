@@ -12,5 +12,5 @@ m.apply_on_parse = true
 s = m:section(TypedSection, "detect_clients","Wireless detect clients")
 s.anonymous = true
 s.addremove = false
-s:option(Value, "uri","api url")
+s:option(Value, "uri","Url")
 return m
