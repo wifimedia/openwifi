@@ -274,6 +274,8 @@ cat $response_file | while read line ; do
 	#elif [  "$key" = "cpn.enable" ];then
 	#	echo $value >/tmp/cpn_flag
 	#	uci set nodogsplash.@nodogsplash[0].enabled="$value"
+	#	uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
+	#	uci set wifimedia.@nodogsplash[0].network="lan"	
 	#elif [  "$key" = "cpn.domain" ];then
 	#	uci set wifimedia.@nodogsplash[0].domain="$value"
 	#elif [  "$key" = "cpn.walledgarden" ];then
