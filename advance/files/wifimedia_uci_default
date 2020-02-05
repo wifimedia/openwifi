@@ -198,18 +198,6 @@ uci batch <<-EOF
 	commit dropbear
 EOF
 
-###Sync
-uci -q get wifimedia.@sync[0] || {
-	uci batch <<-EOF
-	add wifimedia sync
-	set wifimedia.@sync[0]=sync
-	set wifimedia.@sync[0].version=2.1.0
-	#set wifimedia.@sync[0].domain="crm.wifimedia.com.vn"
-	set wifimedia.@sync[0].server="http://monitor.wifimedia.vn/api/monitoring/"
-	commit wifimedia
-EOF
-}
-
 NET_ID="hotspot"
 FW_ZONE="hotspot"
 IFNAME="eth0.300" #VLAN1
