@@ -245,6 +245,8 @@ cat $response_file | while read line ; do
 		echo $value >/tmp/cpn_flag
 		uci set nodogsplash.@nodogsplash[0].enabled="$value"
 		uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
+		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
+		uci set wifimedia.@nodogsplash[0].network="lan"
 	elif [  "$key" = "cpn.domain" ];then
 		uci set wifimedia.@nodogsplash[0].domain="$value"
 	elif [  "$key" = "cpn.walledgarden" ];then
@@ -279,7 +281,7 @@ done
 uci commit
 
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
-	echo "Config & Start Captive Portal" 
+	echo "Config & Start Captive Portal"
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
 	echo '* * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds
 	/etc/init.d/nodogsplash enable
