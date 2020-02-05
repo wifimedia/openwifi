@@ -51,13 +51,13 @@ echo '<!doctype html>
 uci -q get wifimedia.@nodogsplash[0] || {
         uci batch <<EOF
         add wifimedia nodogsplash
-		set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
-		set wifimedia.@nodogsplash[0].https=0
-		set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+		    set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
+		    set wifimedia.@nodogsplash[0].https=0
+		    set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
         commit wifimedia
 EOF
 }
-uci set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+uci set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
 uci commit wifimedia
 
 /etc/init.d/nodogsplash disable
