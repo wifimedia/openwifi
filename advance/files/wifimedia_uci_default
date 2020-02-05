@@ -58,6 +58,15 @@ uci -q get wifimedia.@LTE[0] || {
 	commit wifimedia
 EOF
 }
+
+uci -q get wifimedia.@detect_clients[0] || {
+        uci batch <<EOF
+        add wifimedia detect_clients
+		set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
+        commit wifimedia
+EOF
+}
+
 #change ver  for upgrade
 uci set wifimedia.@sync[0].version=2.1.1
 uci set wifimedia.@sync[0].rsn=2.6
