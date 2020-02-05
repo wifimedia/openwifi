@@ -156,9 +156,9 @@ _nextify_service(){
 	if [ $? -eq "0" ];then
 		if [ $_flag -eq 1 ];then
 			#dich vu nextify dang chay
-			#nodogsplash dang chay
 			ndsctl status > /tmp/ndsctl_status.txt
 			if [ $? -eq 0 ]; then
+				#nodogsplash dang chay
 				exit;
 			else
 				#nodogsplash khong chay thi start lai
