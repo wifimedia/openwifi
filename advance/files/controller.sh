@@ -226,6 +226,8 @@ cat $response_file | while read line ; do
 	# uci set wifimedia.@nodogsplash[0].network="$value"		
 	elif [  "$key" = "cpn.fb" ];then
 		uci set wifimedia.@nodogsplash[0].facebook="$value"
+		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
+		uci set wifimedia.@nodogsplash[0].network="lan"		
 	elif [  "$key" = "cpn.dhcpextenal" ];then
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 	elif [  "$key" = "cpn.clientdetect" ];then
