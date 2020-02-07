@@ -300,7 +300,7 @@ fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
-	service network restart
+	/etc/init.d/network restart
 	rm /tmp/network_flag
 	echo "WIFI Online"
 fi
