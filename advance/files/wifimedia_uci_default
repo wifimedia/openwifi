@@ -49,11 +49,11 @@ uci -q get wifimedia.@hash256[0] || {
 EOF
 }
 
-uci -q get wifimedia.@detect_clients[0] || {
+uci -q get wifimedia.@heartbeat[0] || {
         uci batch <<EOF
-        add wifimedia detect_clients
-		set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
-		set wifimedia.@detect_clients[0].heartbeat_uri="http://portal.nextify.vn/heartbeat"
+        add wifimedia heartbeat
+		set wifimedia.@heartbeat[0].uri="http://api.nextify.vn/clients_around"
+		set wifimedia.@heartbeat[0].heartbeat_uri="http://portal.nextify.vn/heartbeat"
         commit wifimedia
 EOF
 }

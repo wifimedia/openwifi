@@ -243,7 +243,12 @@ cat $response_file | while read line ; do
 		else
 		 #Tat openvpn wifimedia
 		 /etc/init.d/openvpn stop ${certificate}
+		 uci set openvpn.${certificate}.enabled="0"
 		fi
+	elif [  "$key" = "detectclient.uri" ];then
+		uci set wifimedia.@heartbeat[0].uri="$value"
+	elif [  "$key" = "heartbeat.uri" ];then
+		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"				
 	#Cau hinh Captive Portal
 	elif [  "$key" = "cpn.enable" ];then
 		echo $value >/tmp/cpn_flag
@@ -262,13 +267,6 @@ cat $response_file | while read line ; do
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 		uci commit
 		/sbin/wifimedia/captive_portal.sh dhcp_extension
-	elif [  "$key" = "cpn.clientdetect" ];then
-		uci set wifimedia.@nodogsplash[0].cpn_detect="$value"
-		if [ "$value" = "1" ];then
-			crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
-		else
-			echo ''>/etc/crontabs/nds && /etc/init.d/cron restart
-		fi	
 	#Cau hinh auto reboot
 	elif [  "$key" = "scheduletask.enable" ];then
 		echo $value >/tmp/scheduled_flag
@@ -287,20 +285,12 @@ uci commit
 if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start Captive Portal"
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	echo '* * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds
 	/etc/init.d/nodogsplash enable
-	/etc/init.d/cron restart
 	rm /tmp/cpn_flag
 else
   echo "Stop Captive Portal"
   /etc/init.d/nodogsplash disable
   service firewall restart
-fi
-
-if [ $(cat /tmp/clientdetect) -eq 1 ]; then
-	echo "restarting conjob"
-	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
-	rm /tmp/clientdetect
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
@@ -613,7 +603,6 @@ done
 #$_device: aa-bb-cc-dd-ee-ff
 uci -q get openvpn.@$certificate[0] || {
 uci batch <<-EOF
-	add openvpn $certificate
 	set openvpn.${certificate}=openvpn
 	set openvpn.${certificate}.config="$cfg_ovpn"
 	set openvpn.${certificate}.enabled="1"
