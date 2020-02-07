@@ -122,7 +122,6 @@ config_captive_portal() {
 		sleep 5
 		/etc/init.d/nodogsplash start
 	fi
-	cpn_detect
 	write_login
 }
 
@@ -275,16 +274,10 @@ dhcp_extension(){
 		uci set wireless.default_radio1.network=$networkncpn		
 		uci add_list network.local.network='wan'
 	else
-
 		uci set wireless.default_radio0.network=$networkncpn
 		uci set dhcp.$networkncpn.ignore='0'
 	fi
 	uci commit && wifi up
 }
-cpn_detect(){
-	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn_detect`
-	if [ $cpn_status -eq 0 ];then
-		echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
-	fi
-}
+
 "$@"

@@ -286,11 +286,16 @@ if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 	echo "Config & Start Captive Portal"
 	/sbin/wifimedia/captive_portal.sh config_captive_portal
 	/etc/init.d/nodogsplash enable
+	echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
+	&& /etc/init.d/cron restart
 	rm /tmp/cpn_flag
 else
   echo "Stop Captive Portal"
   /etc/init.d/nodogsplash disable
-  service firewall restart
+  /etc/init.d/firewall restart
+  echo ''>/etc/crontabs/nds
+  && /etc/init.d/cron restart
+  #service firewall restart
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
