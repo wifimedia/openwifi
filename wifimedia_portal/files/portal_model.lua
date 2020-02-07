@@ -59,11 +59,11 @@ cpn:depends({enable_cpn="1"})
 function service.write(self, section, value)
 if value == self.enabled then
 		luci.sys.call("uci set nodogsplash.@nodogsplash[0].enabled='1' && uci commit nodogsplash")
-		luci.util.exec("echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart")
+		--luci.util.exec("echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart")
 		luci.util.exec("/etc/init.d/nodogsplash enable")
 	else
 		luci.sys.exec("uci set nodogsplash.@nodogsplash[0].enabled='0' && uci commit nodogsplash")
-		luci.util.exec("echo ''>/etc/crontabs/nds && /etc/init.d/cron restart")
+		--luci.util.exec("echo ''>/etc/crontabs/nds && /etc/init.d/cron restart")
 		luci.util.exec("/etc/init.d/nodogsplash disable && /etc/init.d/nodogsplash stop")	
 	end
 	return Flag.write(self, section, value)
