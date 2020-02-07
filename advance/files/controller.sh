@@ -434,7 +434,7 @@ heartbeat(){ #Heartbeat Nextify
 
 _post_clients(){ #$global_device: aa:bb:cc:dd:ee:ff
   if [ -n "$uri" ];then
-		wget -q --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $uri -O /dev/null #http://api.nextify.vn/clients_around
+		wget -q --post-data="clients=${client_data}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $uri -O /dev/null #http://api.nextify.vn/clients_around
   fi	
 }
 
@@ -468,16 +468,20 @@ get_client_connect_wlan(){
 				if [ -f /etc/ethers ]; then
 					mac=$(echo $line | awk '{print $1}' FS=" ")
 					host=$(awk -v MAC=$mac 'tolower($1)==MAC {print $1}' FS=" " /etc/ethers)
+					signal=$(echo $line | awk '{print $2 $3}' FS=" ")
 					data=";$mac"
 					echo $data >>/tmp/client_connect_wlan
+					echo "$mac;$signal">>/tmp/client_data
 				fi
 			fi
 		done
 	done
 	IFS="$OLD_IFS"
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
+	client_data=`cat /tmp/client_data`
 	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
 	rm /tmp/client_connect_wlan
+	rm /tmp/client_data
 }
 
 action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
@@ -591,10 +595,10 @@ if [ $rssi_on == "1" ];then
 			if echo "$line" | grep -q "signal:"; then
 				signal=`echo "$line" | awk '{print $2}'`
 				#echo "$mac (on $iface) $signal $host"
-				if [ "$signal" -lt "$LOWER" ]; then
-					#echo $MAC IS $SNR - LOWER THAN $LOWER DEAUTH THEM
-					echo "ubus call hostapd.$iface "del_client" '{\"addr\":\"$mac\", \"reason\": 1, \"deauth\": True, \"ban_time\": $ban_time}'" >>/tmp/denyclient
-				fi
+				#if [ "$signal" -lt "$LOWER" ]; then
+				#	#echo $MAC IS $SNR - LOWER THAN $LOWER DEAUTH THEM
+				#	echo "ubus call hostapd.$iface "del_client" '{\"addr\":\"$mac\", \"reason\": 1, \"deauth\": True, \"ban_time\": $ban_time}'" >>/tmp/denyclient
+				#fi
 			fi
 		done
 	done
