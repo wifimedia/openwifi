@@ -27,7 +27,8 @@ touch $response_file
 hash256=$(sha256sum $response_file | awk '{print $1}')
 device_fw=$(cat /sys/class/ieee80211/phy0/macaddress |sed 's/:/-/g' | tr a-z A-Z)
 link_config=`uci -q get wifimedia.@sync[0].server`
-cpn_url=`uci -q get wifimedia.@detect_clients[0].uri`
+uri=`uci -q get wifimedia.@detect_clients[0].uri`
+heartbeat_uri=`uci -q get wifimedia.@detect_clients[0].heartbeat_uri`
 
 ip_wan=$(ifconfig br-wan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 ip_lan=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')

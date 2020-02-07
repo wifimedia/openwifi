@@ -11,6 +11,10 @@ touch /tmp/diagnostics_log
 cfg_ovpn=/etc/openvpn/wifimedia.ovpn
 srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
 certificate=wifimedia
+
+#[ -z STRING ] means: if STRING is NULL then return TRUE (0)
+#[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
+
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	#echo $PUBLIC_IP
@@ -337,12 +341,12 @@ _nds(){ #Status Captive Portal
 srv(){
 	token
 	monitor_port
-	get_client_connect_wlan
+	heartbeat
 	ip_public
 	_nds
 	diagnostics
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}" "$link_config$_device" -O $response_file
-
+	wget -q --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}" "$link_config$_device" -O $response_file
+	#wget -q,  --quiet
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
 	#echo "mac_clients "$client_connect_wlan
@@ -412,27 +416,28 @@ monitor_port(){
 	rm /tmp/monitor_port
     rm /tmp/tmp_port
 }
-_detect_clients(){ #Support Nextify
-	get_client_connect_wlan
-	_post_clients
-}
 
 heartbeat(){ #Heartbeat Nextify
 	get_client_connect_wlan
 	_get_server
+	_post_clients
 }
 
 _post_clients(){ #$global_device: aa:bb:cc:dd:ee:ff
-	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
+  if [ -n "$uri" ];then
+		wget -q --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $uri -O /dev/null #http://api.nextify.vn/clients_around
+  fi	
 }
 
 _get_server(){ # Connect to server Nextify
-	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
-	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
-	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	wget -q --timeout=3 \
-		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
-		 -O /dev/null
+	if [ -n "$heartbeat_uri" ];then
+		MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+		UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+		RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+		wget -q --timeout=3 \
+			 "$heartbeat_uri?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
+			 -O /dev/null
+	fi		 
 }
 
 get_client_connect_wlan(){
