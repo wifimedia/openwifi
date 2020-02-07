@@ -339,11 +339,11 @@ _nds(){ #Status Captive Portal
 	nodogsplash=`pidof nodogsplash`
 	if [ -z $nodogsplash ];then
 		_cpn="Offline"
-		echo $_cpn
+		#echo $_cpn
 		
 	else
 		_cpn="Online"
-		echo $_cpn
+		#echo $_cpn
 	fi
 }
 
@@ -384,9 +384,9 @@ token(){
 	secret="(C)WifiMedia2019"
 	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
 	key=${mac_device}${secret}
-	echo $key
 	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
-	echo $token
+	#echo $token
+	#echo $key
 }
 
 diagnostics(){
@@ -421,7 +421,7 @@ monitor_port(){
 		shift
 	done
 	ports_data=$(cat /tmp/tmp_port|xargs )
-	echo $ports_data
+	#echo $ports_data
 	rm /tmp/monitor_port
     rm /tmp/tmp_port
 }
