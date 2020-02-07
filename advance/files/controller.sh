@@ -315,9 +315,18 @@ _boot(){
 	checking
 	action_lan_wlan
 	openvpn
+	_lic
 }
 
 _lic(){
+	while true; do
+    	ping -c3 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
 	license_srv
 }
 
@@ -467,6 +476,7 @@ get_client_connect_wlan(){
 }
 
 action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
+	find_mac_gateway=/tmp/blacklist
 	echo "" > $find_mac_gateway
 	wget -q "${blacklist}" -O $find_mac_gateway
 	curl_result=$?
@@ -494,9 +504,6 @@ license_srv() {
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
 					echo "Activated" >/etc/opt/license/status
-					/etc/init.d/wifimedia_check disable
-					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-					rm /etc/crontabs/wificode >/dev/null 2>&1
 					license_local
 				fi
 			done	
@@ -524,8 +531,6 @@ license_local() {
 	lcs=/etc/opt/wfm_lcs
 	if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 		echo "Activated" >/etc/opt/license/status
-		/etc/init.d/cron restart
-		rm /etc/crontabs/wificode >/dev/null 2>&1
 		rm $lcs >/dev/null 2>&1
 	else
 		echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
@@ -538,7 +543,6 @@ license_local() {
 			uci commit wireless
 			wifi
 			echo "Activated" >/etc/opt/license/status
-			rm /etc/crontabs/wificode >/dev/null 2>&1
 			rm $lcs >/dev/null 2>&1
 			/etc/init.d/cron restart
 		else

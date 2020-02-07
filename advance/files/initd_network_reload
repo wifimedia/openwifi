@@ -8,15 +8,6 @@ boot() {
 	if [ "$(uci -q get wifimedia.@lte[0].4glte)" -eq 0 ] || [ "$(uci -q get wifimedia.@lte[0].4glte)" = "" ];then
 		echo 0 >/sys/class/gpio/power_usb3/value
 	fi
-	#while true; do
-    #	ping -c1 -W1 8.8.8.8
-    #	if [ ${?} -eq 0 ]; then
-    #  	  	break
-   	#else
-    #    	sleep 1
-    #	fi
-	#done
 	/sbin/wifimedia/controller.sh _boot
-	/sbin/wifimedia/controller.sh openvpn
 }
 
