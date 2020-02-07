@@ -162,6 +162,7 @@ _nextify_service(){
 			else
 				#nodogsplash khong chay thi start lai
 				uci set nodogsplash.@nodogsplash[0].enabled='1'
+				uci set wifimedia.@nodogsplash[0].enable_cpn='1'
 				uci commit
 				/etc/init.d/nodogsplash start
 			fi
@@ -179,6 +180,7 @@ _disable_captive() {
      		if [ $nds_enable == "0" ];then
          		exit
      		fi
+     		uci set wifimedia.@nodogsplash[0].enable_cpn='0'
 			uci set nodogsplash.@nodogsplash[0].enabled='0'
 			uci commit
 			/etc/init.d/firewall restart
