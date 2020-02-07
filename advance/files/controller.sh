@@ -292,8 +292,8 @@ if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
 else
   echo "Stop Captive Portal"
   /etc/init.d/nodogsplash disable
-  /etc/init.d/firewall restart
   echo ''>/etc/crontabs/nds
+  /etc/init.d/firewall restart
   && /etc/init.d/cron restart
   #service firewall restart
 fi
