@@ -218,26 +218,26 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "heartbeat.uri" ];then
 		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"			
 	#Cau hinh Captive Portal
-	elif [  "$key" = "cpn.enable" ];then
-		echo $value >/tmp/cpn_flag
-		uci set nodogsplash.@nodogsplash[0].enabled="$value"
-		uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
-		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
-		uci set wifimedia.@nodogsplash[0].network="lan"		
-	elif [  "$key" = "cpn.domain" ];then
-		uci set wifimedia.@nodogsplash[0].domain="$value"
-	elif [  "$key" = "cpn.walledgarden" ];then
-		value=$(echo $value | sed 's/,/ /g')
-		uci set wifimedia.@nodogsplash[0].preauthenticated_users="$value"
+	#elif [  "$key" = "cpn.enable" ];then
+	#	echo $value >/tmp/cpn_flag
+	#	uci set nodogsplash.@nodogsplash[0].enabled="$value"
+	#	uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
+	#	uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
+	#	uci set wifimedia.@nodogsplash[0].network="lan"		
+	#elif [  "$key" = "cpn.domain" ];then
+	#	uci set wifimedia.@nodogsplash[0].domain="$value"
+	#elif [  "$key" = "cpn.walledgarden" ];then
+	#	value=$(echo $value | sed 's/,/ /g')
+	#	uci set wifimedia.@nodogsplash[0].preauthenticated_users="$value"
 	#Network
 	#elif [  "$key" = "cpn.network" ];then
 	# uci set wifimedia.@nodogsplash[0].network="$value"		
-	elif [  "$key" = "cpn.fb" ];then
-		uci set wifimedia.@nodogsplash[0].facebook="$value"
-	elif [  "$key" = "cpn.dhcpextenal" ];then
-		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
-		uci commit
-		/sbin/wifimedia/captive_portal.sh dhcp_extension
+	#elif [  "$key" = "cpn.fb" ];then
+	#	uci set wifimedia.@nodogsplash[0].facebook="$value"
+	#elif [  "$key" = "cpn.dhcpextenal" ];then
+	#	uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
+	#	uci commit
+	#	/sbin/wifimedia/captive_portal.sh dhcp_extension
 	#Cau hinh auto reboot
 	elif [  "$key" = "scheduletask.enable" ];then
 		echo $value >/tmp/scheduled_flag
@@ -252,22 +252,22 @@ cat $response_file | while read line ; do
 ##
 done	
 uci commit
-
-if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
-	echo "Config & Start Captive Portal"
-	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	/etc/init.d/nodogsplash enable
-	echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
-	/etc/init.d/cron restart
-	rm /tmp/cpn_flag
-else
-  echo "Stop Captive Portal"
-  /etc/init.d/nodogsplash disable
-  echo ''>/etc/crontabs/nds
-  /etc/init.d/firewall restart
-  /etc/init.d/cron restart
+#
+#if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
+#	echo "Config & Start Captive Portal"
+#	/sbin/wifimedia/captive_portal.sh config_captive_portal
+#	/etc/init.d/nodogsplash enable
+#	echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
+#	/etc/init.d/cron restart
+#	rm /tmp/cpn_flag
+#else
+#  echo "Stop Captive Portal"
+#  /etc/init.d/nodogsplash disable
+#  echo ''>/etc/crontabs/nds
+#  /etc/init.d/firewall restart
+#  /etc/init.d/cron restart
   #service firewall restart
-fi
+#fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
@@ -285,7 +285,7 @@ fi
 _boot(){
 	checking
 	action_lan_wlan
-	_lic
+	#_lic
 }
 
 _lic(){
@@ -320,7 +320,7 @@ _nds(){ #Status Captive Portal
 srv(){
 	token
 	monitor_port
-	get_client_connect_wlan
+	heartbeat
 	ip_public
 	_nds
 	diagnostics
@@ -376,11 +376,6 @@ monitor_port(){
 	echo $ports_data
 	rm /tmp/monitor_port
 	disable_port
-}
-
-_detect_clients(){ #Support Nextify
-	get_client_connect_wlan
-	_post_clients
 }
 
 heartbeat(){ #Heartbeat Nextify
