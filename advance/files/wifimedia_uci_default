@@ -55,18 +55,19 @@ uci -q get wifimedia.@nodogsplash[0] || {
         add wifimedia nodogsplash
 		set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
 		set wifimedia.@nodogsplash[0].https=0
-		set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
         commit wifimedia
 EOF
 }
 
-uci -q get wifimedia.@detect_clients[0] || {
+uci -q get wifimedia.@heartbeat[0] || {
         uci batch <<EOF
-        add wifimedia detect_clients
-		set wifimedia.@detect_clients[0].uri="http://api.nextify.vn/clients_around"
+        add wifimedia heartbeat
+		set wifimedia.@heartbeat[0].uri="http://api.nextify.vn/clients_around"
+		set wifimedia.@heartbeat[0].heartbeat_uri="http://portal.nextify.vn/heartbeat"
         commit wifimedia
 EOF
 }
+
 #change ver  for upgrade
 uci set wifimedia.@sync[0].version=2.1.1
 uci set wifimedia.@sync[0].rsn=2.6
