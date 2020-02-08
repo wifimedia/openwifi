@@ -4,12 +4,9 @@
 echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
-#echo '* * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
-#echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >$_nds
-#echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/nds && /etc/init.d/cron restart
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
-MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+MAC_E0=$(cat /sys/class/ieee80211/phy0/macaddress | tr a-z A-Z)
 #write file splash
 echo '<!doctype html>
 <html lang="en">
