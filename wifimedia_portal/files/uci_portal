@@ -57,7 +57,6 @@ uci -q get wifimedia.@nodogsplash[0] || {
 EOF
 }
 
-/etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'
 uci del nodogsplash.@nodogsplash[0].users_to_router
 uci del nodogsplash.@nodogsplash[0].authenticated_users
@@ -70,13 +69,10 @@ uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 115.84
 uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow all"
 #uci set dhcp.lan.ignore=1
 uci commit nodogsplash
-/etc/init.d/nodogsplash stop
 uci commit network
 uci commit dhcp
 uci commit firewall
-/etc/init.d/network restart
-/etc/init.d/dnsmasq restart
-/etc/init.d/firewall restart
-/etc/init.d/relayd restart
+/etc/init.d/nodogsplash stop
+/etc/init.d/nodogsplash disable
 #sleep 5
 #iptables -I FORWARD -o br-wan -d $(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }') -j ACCEPT
