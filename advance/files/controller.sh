@@ -4,7 +4,7 @@
 
 . /sbin/wifimedia/variables.sh
 diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
-touch $diag_file
+touch /tmp/diagnostics_ip
 touch /tmp/ports
 touch /tmp/client_connect_wlan
 touch /tmp/diagnostics_log
