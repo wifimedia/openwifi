@@ -50,15 +50,10 @@ dhcpextension = s:taboption( "basic",Flag, "dhcpextension","DHCP Extension")
 dhcpextension.rmempty = false
 dhcpextension:depends({enable_cpn="1"})
 
-cpn = s:taboption( "basic",Flag, "cpn_detect","CPN Clients detect")
-cpn.rmempty = false
-cpn:depends({enable_cpn="1"})
---network:depends({enable_cpn="1"})
---[[On/Off Service]]--
 function service.write(self, section, value)
 if value == self.enabled then
 		luci.sys.call("uci set nodogsplash.@nodogsplash[0].enabled='1' && uci commit nodogsplash")
-		luci.util.exec("crontab /etc/cron_nds -u nds && /etc/init.d/cron restart")
+		luci.util.exec("echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds && /etc/init.d/cron restart")
 		luci.util.exec("/etc/init.d/nodogsplash enable")
 	else
 		luci.sys.exec("uci set nodogsplash.@nodogsplash[0].enabled='0' && uci commit nodogsplash")
@@ -70,15 +65,6 @@ end
 		-- retain server list even if disabled
 function service.remove() end
 
-function cpn.write(self, section, value)
-if value == self.enabled then
-		luci.util.exec("crontab /etc/cron_nds -u nds && /etc/init.d/cron restart")
-	end
-	return Flag.write(self, section, value)
-end
-		-- retain server list even if disabled
-function cpn.remove() end
-	
 function dhcpextension.write(self, section, value)
 if value == self.enabled then
 		luci.sys.call("uci set network.local='interface'")
