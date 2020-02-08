@@ -61,6 +61,8 @@ define Package/advance/install
 	$(INSTALL_DATA) ./files/button.config $(1)/etc/config/button
 	$(INSTALL_DATA) ./files/switchmode_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/switchmode.lua
 	$(INSTALL_DATA) ./files/switchmode_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/switchmode.lua
+	$(INSTALL_DATA) ./files/detect_clients_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/detect_clients.lua
+	$(INSTALL_DATA) ./files/detect_clients_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/detect_clients.lua
 endef
 
 define Package/advance/conffiles
