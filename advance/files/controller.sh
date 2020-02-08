@@ -9,6 +9,7 @@ touch $diag_file
 touch /tmp/ports
 touch /tmp/client_connect_wlan
 touch /tmp/diagnostics_log
+touch /tmp/client_data
 #>/dev/null 2>&1
 #[ -z STRING ] means: if STRING is NULL then return TRUE (0)
 #[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
