@@ -320,7 +320,7 @@ _nds(){ #Status Captive Portal
 srv(){
 	token
 	monitor_port
-	get_client_connect_wlan
+	heartbeat
 	ip_public
 	_nds
 	diagnostics
@@ -390,11 +390,6 @@ monitor_port(){
 	echo $ports_data
 	rm /tmp/monitor_port
     rm /tmp/tmp_port
-}
-
-_detect_clients(){ #Support Nextify
-	get_client_connect_wlan
-	_post_clients
 }
 
 heartbeat(){ #Heartbeat Nextify
