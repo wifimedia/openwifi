@@ -542,7 +542,6 @@ license_local() {
 		echo "Activated" >/etc/opt/license/status
 		rm $lcs >/dev/null 2>&1
 	else
-		echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
 		echo "Not Activated" >/etc/opt/license/status
 	fi
 	if [ "$uptime" -gt 15 ]; then #>15days
@@ -555,7 +554,6 @@ license_local() {
 			rm $lcs >/dev/null 2>&1
 			/etc/init.d/cron restart
 		else
-			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
 			echo "Not Activated" >/etc/opt/license/status
 			uci set wireless.radio0.disabled="1"
 			uci set wireless.radio1.disabled="1"
