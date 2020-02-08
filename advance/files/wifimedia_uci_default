@@ -123,11 +123,6 @@ if [ "$newifi3" == "Newifi-D2" ];then
 	echo "NEWIFI" >/etc/hardware
 fi
 
-#enable wifi
-uci set wireless.radio0.disabled="0"
-uci commit wireless
-wifi
-#for hwmode n ac
 uci batch <<-EOF
 	delete network.wan6
 	commit network
