@@ -74,9 +74,5 @@ uci commit nodogsplash
 uci commit network
 uci commit dhcp
 uci commit firewall
-/etc/init.d/network restart
-/etc/init.d/dnsmasq restart
-/etc/init.d/firewall restart
-/etc/init.d/relayd restart
 #sleep 5
 #iptables -I FORWARD -o br-wan -d $(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }') -j ACCEPT
