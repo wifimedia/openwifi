@@ -5,6 +5,7 @@ NODOGSPLASH_CONFIG=/tmp/etc/nodogsplash.conf
 PREAUTHENTICATED_ADDRS=/tmp/preauthenticated_addrs
 PREAUTHENTICATED_ADDR_FB=/tmp/preauthenticated_addr_fb
 PREAUTHENTICATED_RULES=/tmp/preauthenticated_rules
+NEXTIFY_ADDRS=/tmp/nextify_addrs
 NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
 networkncpn=${NET_ID:-lan}
 walledgadent=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users | sed 's/,/ /g'`
@@ -52,7 +53,7 @@ config_captive_portal() {
 		uci set nodogsplash.@nodogsplash[0].sessiontimeout="$sessiontimeout_default";
 		uci set nodogsplash.@nodogsplash[0].checkinterval="$ctv";
 		# Whitelist IP
-		for i in portal.nextify.vn static.nextify.vn nextify.vn nextify.co crm.nextify.vn googletagmanager.com wifimedia.vn portal.wifioto.net wifioto.net $domain $walledgadent; do
+		for i in portal.nextify.vn portal.nextify.co static.nextify.vn nextify.vn crm.nextify.vn googletagmanager.com wifimedia.vn portal.wifioto.net wifioto.net ipecho.net $domain $walledgadent; do
 			nslookup ${i} 8.8.8.8 2> /dev/null | \
 				grep 'Address ' | \
 				grep -v '127\.0\.0\.1' | \
@@ -78,16 +79,15 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].authenticated_users >/dev/null 2>&1
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all" >/dev/null 2>&1
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 192.168.5.1" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1" >/dev/null 2>&1
 		uci commit
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
 		if [ -z "$inf" ];then #neu khong co int thi
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
 			uci set wifimedia.@nodogsplash[0].network="hotspot"
-			uci set wireless.default_radio0.network="hotspot"			
+			uci set wireless.default_radio0.network="hotspot"
 		fi
 
 		if network_get_ipaddr addr "wan"; then
@@ -122,7 +122,6 @@ config_captive_portal() {
 		sleep 5
 		/etc/init.d/nodogsplash start
 	fi
-	cpn_detect
 	write_login
 }
 
@@ -146,38 +145,48 @@ captive_portal_restart(){
 	fi
 }
 
-heartbeat(){
-	captive_portal_restart
-}
-
 _nextify_service(){
 
     domain_nextify=`echo $domain_default | cut -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17`
-	flag_dns=/tmp/nextify_dns
-	_flag=`cat $flag_dns`		 
+	flag_dns=/tmp/nextify_dns		 
 	wget -q --timeout=3 \
 		"http://api.nextify.co/check_portal?site=$domain_nextify" -O $flag_dns
 	if [ $? -eq "0" ];then
+		_flag=`cat $flag_dns`
 		if [ $_flag -eq 1 ];then
 			#dich vu nextify dang chay
-			#nodogsplash dang chay
 			ndsctl status > /tmp/ndsctl_status.txt
 			if [ $? -eq 0 ]; then
+				#nodogsplash dang chay
 				exit;
 			else
 				#nodogsplash khong chay thi start lai
 				uci set nodogsplash.@nodogsplash[0].enabled='1'
+				uci set wifimedia.@nodogsplash[0].enable_cpn='1'
 				uci commit
 				/etc/init.d/nodogsplash start
 			fi
 		else
 		#dich vu next bi tat thi cho tat luon chuong trinh nodogsplash
-			/etc/init.d/nodogsplash stop
+		_disable_captive
+		fi
+	else
+		_disable_captive	
+	fi
+}
+
+_disable_captive() {
+			nds_enable=$(uci get nodogsplash.@nodogsplash[0].enabled)
+     		if [ $nds_enable == "0" ];then
+         		exit
+     		fi
+     		uci set wifimedia.@nodogsplash[0].enable_cpn='0'
 			uci set nodogsplash.@nodogsplash[0].enabled='0'
 			uci commit
-			
-		fi	
-	fi
+			/etc/init.d/firewall restart
+}
+heartbeat(){
+	captive_portal_restart
 }
 
 get_captive_portal_clients() {
@@ -276,17 +285,10 @@ dhcp_extension(){
 		uci set wireless.default_radio1.network=$networkncpn		
 		uci add_list network.local.network='wan'
 	else
-
 		uci set wireless.default_radio0.network=$networkncpn
 		uci set dhcp.$networkncpn.ignore='0'
 	fi
 	uci commit && wifi up
 }
 
-cpn_detect(){
-	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn_detect`
-	if [ $cpn_status -eq 0 ];then
-		echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
-	fi
-}
 "$@"
