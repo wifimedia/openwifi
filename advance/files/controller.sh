@@ -326,10 +326,6 @@ srv(){
 	diagnostics
 	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}" "$link_config$_device" -O $response_file
 
-	#echo "Token "$token
-	#echo "AP MAC "$global_device
-	#echo "mac_clients "$client_connect_wlan
-	#echo "ports_data "$ports_data
 	curl_result=$?
 	curl_data=$(cat $response_file)
 	if [ "$curl_result" -eq "0" ]; then
@@ -373,23 +369,13 @@ diagnostics(){
 }
 
 monitor_port(){
-	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |tail -4|head -5| while read line;do
+	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |tail -6|head -4| while read line;do
 		echo "$line," >>/tmp/monitor_port
 	done
-	#ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
-	ports=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ link:/:/g'| sed 's/port:1://g'| sed 's/port:2://g'| sed 's/port:3://g'| sed 's/port:4://g' )
-	echo $ports >/tmp/ports
-	var1=`cat /tmp/ports`
-	var2='4 3 2 1'
-	set -- $var1
-	for j in $var2;do
-		echo "$j:$1" >>/tmp/tmp_port
-		shift
-	done
-	ports_data=$(cat /tmp/tmp_port|xargs )
+	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
 	echo $ports_data
 	rm /tmp/monitor_port
-    rm /tmp/tmp_port
+	disable_port
 }
 
 _detect_clients(){ #Support Nextify
@@ -464,6 +450,14 @@ action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 			fi
 		done	
 	fi
+}
+
+disable_port(){
+	action_port='/tmp/ports'
+	for i in $(cat $action_port); do
+		swconfig dev switch0 port $i set disable 1
+	done
+	swconfig dev switch0 set apply
 }
 
 license_srv() {
