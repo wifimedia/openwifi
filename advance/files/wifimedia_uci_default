@@ -167,13 +167,6 @@ echo 'DISTRIB_CODENAME="'"$DISTRIB_CODENAME"'"' >> /etc/openwrt_release
 echo 'DISTRIB_TARGET="'"$DISTRIB_TARGET"'"' >> /etc/openwrt_release
 echo 'DISTRIB_DESCRIPTION="'"$DISTRIB_DESCRIPTION"'"' >> /etc/openwrt_release
 
-/etc/init.d/system reload
-/etc/init.d/led reload
-/etc/init.d/cron start
-/etc/init.d/cron enable
-/etc/init.d/network_reload enable
-/etc/init.d/network_reload start
-
 uci set dhcp.lan.start=99
 uci set dhcp.lan.limit=100
 uci set dhcp.lan.leasetime=1h
@@ -261,5 +254,11 @@ touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
 chmod +x /sbin/wifimedia/*
+/etc/init.d/system reload
+/etc/init.d/led reload
+/etc/init.d/cron start
+/etc/init.d/cron enable
+/etc/init.d/network_reload enable
+/etc/init.d/network_reload start
 /etc/init.d/dropbear restart
 /etc/init.d/network restart
