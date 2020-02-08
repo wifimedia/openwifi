@@ -176,14 +176,14 @@ _nextify_service(){
 }
 
 _disable_captive() {
-			nds_enable=$(uci get nodogsplash.@nodogsplash[0].enabled)
-     		if [ $nds_enable == "0" ];then
-         		exit
-     		fi
-     		uci set wifimedia.@nodogsplash[0].enable_cpn='0'
-			uci set nodogsplash.@nodogsplash[0].enabled='0'
-			uci commit
-			/etc/init.d/firewall restart
+	nds_enable=$(uci get nodogsplash.@nodogsplash[0].enabled)
+    if [ $nds_enable == "0" ];then
+    	exit
+    fi
+    uci set wifimedia.@nodogsplash[0].enable_cpn='0'
+	uci set nodogsplash.@nodogsplash[0].enabled='0'
+	uci commit
+	/etc/init.d/firewall restart
 }
 heartbeat(){
 	captive_portal_restart
