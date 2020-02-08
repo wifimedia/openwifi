@@ -388,7 +388,7 @@ monitor_port(){
 		shift
 	done
 	ports_data=$(cat /tmp/tmp_port|xargs )
-	echo $ports_data
+	#echo $ports_data
 	rm /tmp/monitor_port
     rm /tmp/tmp_port
 }
