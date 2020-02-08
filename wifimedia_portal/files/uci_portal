@@ -4,8 +4,8 @@
 echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
-echo '*/2 * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
-echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >>$_nds
+#echo '* * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
+#echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >$_nds
 #echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/nds && /etc/init.d/cron restart
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
@@ -51,14 +51,11 @@ echo '<!doctype html>
 uci -q get wifimedia.@nodogsplash[0] || {
         uci batch <<EOF
         add wifimedia nodogsplash
-		set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
-		set wifimedia.@nodogsplash[0].https=0
-		set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+		    set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
+		    set wifimedia.@nodogsplash[0].https=0
         commit wifimedia
 EOF
 }
-uci set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
-uci commit wifimedia
 
 /etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'
@@ -69,7 +66,6 @@ uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1"
-uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 192.168.5.1"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 115.84.183.186"
 uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow all"
 #uci set dhcp.lan.ignore=1
