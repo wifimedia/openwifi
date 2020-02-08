@@ -148,7 +148,7 @@ cat $response_file | while read line ; do
 		uci set wireless.@wifi-iface[0].network="wan"
 		uci set wifimedia.@switchmode[0].switch_port="$value"		
 		if [ "$value" = "1" ];then
-			uci delete network.lan
+			uci delete network.lan >/dev/null 2>&1
 			uci set network.wan.proto="dhcp"
 			uci set network.wan.ifname="eth0 eth1.1"
 		else
