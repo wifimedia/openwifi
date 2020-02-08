@@ -9,7 +9,7 @@ local uci = require "luci.model.uci".cursor()
 m = Map("wifimedia", "")
 m.apply_on_parse = true
 
-s = m:section(TypedSection, "detect_clients","Wireless detect clients")
+s = m:section(TypedSection, "heartbeat","Wireless detect clients")
 s.anonymous = true
 s.addremove = false
 s:option(Value, "uri","Sync server")
