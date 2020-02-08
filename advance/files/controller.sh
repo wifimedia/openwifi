@@ -466,25 +466,6 @@ action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 	fi
 }
 
-disable_port(){
-	action_port='/tmp/ports'
-	for i in $(cat $action_port); do
-		swconfig dev switch0 port $i set disable 1
-		#echo $i
-	done
-	swconfig dev switch0 set apply
-}
-
-monitor_port(){
-	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |tail -6|head -4| while read line;do
-		echo "$line," >>/tmp/monitor_port
-	done
-	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
-	echo $ports_data
-	rm /tmp/monitor_port
-	disable_port
-}
-
 license_srv() {
 	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
 	#$_device: aa-bb-cc-dd-ee-ff
