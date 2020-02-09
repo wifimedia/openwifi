@@ -251,7 +251,7 @@ uci batch << EOF
 	commit network
 	commit dhcp
 EOF
-
+echo "" >/etc/config/openvpn
 touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
