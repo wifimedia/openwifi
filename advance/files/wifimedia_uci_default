@@ -210,7 +210,7 @@ EOF
 
 NET_ID="hotspot"
 FW_ZONE="hotspot"
-IFNAME="eth0.300" #VLAN1
+IFNAME="eth0.300" #VLAN300
 uci batch << EOF
 	set network.${NET_ID}=interface
 	set network.${NET_ID}.ifname=${IFNAME}
