@@ -227,7 +227,7 @@ cat $response_file | while read line ; do
 		uci delete network.lan >/dev/null 2>&1
 		uci set network.lan="interface"
 		uci set network.lan.type="bridge"	
-		uci set network.lan.ifname="eth1.1"
+		uci set network.lan.ifname="eth0.1"
 		if [ "$value" = "1" ];then ##Static 
 			uci set network.lan.proto="static"	
 		else ##DHCP Client nhan IP
@@ -248,7 +248,7 @@ cat $response_file | while read line ; do
 		uci delete network.wan >/dev/null 2>&1
 		uci set network.wan="interface"
 		uci set network.wan.type="bridge"	
-		uci set network.wan.ifname="eth0"				
+		uci set network.wan.ifname="eth0.2"				
 		if [ "$value" = "1" ];then ##Static 
 			uci set network.wan.proto="static"
 		else ##DHCP Client nhan IP
