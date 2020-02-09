@@ -131,7 +131,7 @@ cat $response_file | while read line ; do
 		uci delete network.lan >/dev/null 2>&1
 		uci set network.lan="interface"
 		uci set network.lan.type="bridge"	
-		uci set network.lan.ifname="eth1.1"
+		uci set network.lan.ifname="eth1"
 		if [ "$value" = "1" ];then ##Static 
 			uci set network.lan.proto="static"	
 		else ##DHCP Client nhan IP
