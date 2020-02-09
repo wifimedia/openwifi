@@ -151,7 +151,7 @@ cat $response_file | while read line ; do
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0 eth1.1"
+			uci set network.wan.ifname="eth0 eth1"
 		else
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
