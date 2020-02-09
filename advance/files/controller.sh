@@ -18,46 +18,6 @@ ip_public(){
 	echo $PUBLIC_IP
 }
 
-wr940v5() { #checking internet
-
-	#check gateway
-	ping -c 2 "$gateway" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
-	fi
-	
-	#checking internet
-	ping -c 2 "8.8.8.8" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
-	fi
-
-}
-
-wr940v6() { #checking internet
-
-	#check gateway
-	ping -c 2 "$gateway" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
-		echo 1 >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/brightness
-	fi
-	
-	#checking internet
-	ping -c 2 "8.8.8.8" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
-	fi
-}
-
 #ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`#
 
 checking (){
@@ -158,7 +118,7 @@ cat $response_file | while read line ; do
 			uci set network.lan.ipaddr="172.16.99.1"
 			uci set network.lan.netmask="255.255.255.0"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"
+			uci set network.lan.ifname="eth1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
