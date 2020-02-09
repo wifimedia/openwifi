@@ -23,7 +23,7 @@ switch_mode.rmempty = false
 			if value == self.enabled then
 				luci.sys.call("uci delete network.lan")
 				luci.sys.call("uci set network.wan.proto='dhcp'")
-				luci.sys.call("uci set network.wan.ifname='eth.2 eth0.1'")
+				luci.sys.call("uci set network.wan.ifname='eth0.1 eth0.2'")
 				luci.sys.call("uci set wireless.@wifi-iface[0].network='wan'")
 				luci.sys.call("uci commit")
 			else
