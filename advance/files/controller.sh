@@ -247,6 +247,7 @@ _boot(){
 	checking
 	action_lan_wlan
 	_lic
+	openvpn
 }
 
 _lic(){
@@ -525,4 +526,36 @@ if [ $rssi_on == "1" ];then
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
 }
+
+openvpn(){
+#check internet
+while true; do
+    ping -c6 -W1 8.8.8.8 >/dev/null
+    if [ ${?} -eq 0 ]; then
+      	break
+   	else
+       	sleep 1
+    fi
+done
+	
+#$_device: aa-bb-cc-dd-ee-ff
+uci -q get openvpn.@$certificate[0] || {
+uci batch <<-EOF
+	set openvpn.${certificate}=openvpn
+	set openvpn.${certificate}.config="$cfg_ovpn"
+	set openvpn.${certificate}.enabled="1"
+	commit openvpn
+EOF
+}
+	wget -q "${srv_ovpn}" -O $cfg_ovpn
+	curl_result=$?
+	if [ "${curl_result}" -eq 0 ]; then
+		uci set openvpn.${certificate}.enabled="1"
+		uci commit openvpn
+		/etc/init.d/openvpn start ${certificate}
+	else
+		/etc/init.d/openvpn stop ${certificate}
+	fi
+}
+
 "$@"
