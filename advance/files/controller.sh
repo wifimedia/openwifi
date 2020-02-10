@@ -559,10 +559,10 @@ _meshpoint(){
 			set wireless.MeshPoint.mesh_fwding=1
 			set wireless.MeshPoint.network="$mesh_net"
 			set wireless.MeshPoint.ifname=PtP
-			set network.wan.stp=1
 			commit wireless
 			commit network
 		EOF
+		uci set network.wan.stp="1"
 		uci set wireless.MeshPoint.mesh_id="$mesh_id"
 		uci set wireless.MeshPoint.network="$mesh_net"
 		}
