@@ -523,23 +523,36 @@ license_local() {
 	fi
 }
 
+mesh_net=`uci -q get wifimedia.MeshPoint.network`
+mesh_id=`uci -q get wifimedia.MeshPoint.mesh_id`
+enable=`uci -q get wifimedia.MeshPoint.enable`
 _meshpoint(){
-	mesh_net=`uci -q get wifimedia.@mesh[0].network`
-	mesh_id=`uci -q get wifimedia.@mesh[0].mesh_id`
-	uci -q get wireless.MeshPoint || {
-		uci batch <<-EOF
-		set wireless.MeshPoint=wifi-iface
-		set wireless.MeshPoint.device=radio0
-		set wireless.MeshPoint.encryption=none
-		set wireless.MeshPoint.mode=mesh
-		set wireless.MeshPoint.mesh_id="$mesh_id"
-		set wireless.MeshPoint.mesh_fwding=1
-		set wireless.MeshPoint.network="$mesh_net"
-		set wireless.MeshPoint.ifname=PtP
-		commit
-	EOF
-	}	
+
+	if [ $enable -eq 1 ];then 
+		uci -q get wireless.MeshPoint || {
+			uci batch <<-EOF
+			set wireless.MeshPoint=wifi-iface
+			set wireless.MeshPoint.device=radio0
+			set wireless.MeshPoint.encryption=none
+			set wireless.MeshPoint.mode=mesh
+			set wireless.MeshPoint.mesh_id="$mesh_id"
+			set wireless.MeshPoint.mesh_fwding=1
+			set wireless.MeshPoint.network="$mesh_net"
+			set wireless.MeshPoint.ifname=PtP
+			set network.wan.stp=1
+			commit wireless
+			commit network
+		EOF
+		}
+	else
+		{
+			uci del wireless.MeshPoint
+			uci commit wireless
+		}
+	fi
+	wifi	
 }
+
 rssi() {
 if [ $rssi_on == "1" ];then
 	level_defaults=-80
