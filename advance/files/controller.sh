@@ -146,7 +146,7 @@ cat $response_file | while read line ; do
 	##Cau hinh switch 5 port		
 	elif [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
-		uci set wireless.@wifi-iface[0].network="wan"
+		uci set wireless.default_radio0.network="wan"
 		uci set wifimedia.@switchmode[0].switch_port="$value"		
 		if [ "$value" = "1" ];then
 			uci delete network.lan
