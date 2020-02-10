@@ -524,8 +524,8 @@ license_local() {
 }
 
 _meshpoint(){
-	mesh_net=`uci -q get wifimedia.@wireless[0].network`
-	mesh_id=`uci -q get wifimedia.@wireless[0].mesh_id`
+	mesh_net=`uci -q get wifimedia.@mesh[0].network`
+	mesh_id=`uci -q get wifimedia.@mesh[0].mesh_id`
 	uci -q get wireless.MeshPoint || {
 		uci batch <<-EOF
 		set wireless.MeshPoint=wifi-iface
