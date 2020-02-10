@@ -252,6 +252,14 @@ uci batch << EOF
 	commit dhcp
 EOF
 
+uci -q get wifimedia.MeshPoint || {
+	uci batch <<-EOF
+	set wifimedia.MeshPoint=mesh
+	set wifimedia.MeshPoint.enable=0
+	commit
+	EOF
+}
+
 touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
