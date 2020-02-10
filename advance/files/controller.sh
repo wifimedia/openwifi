@@ -563,13 +563,15 @@ _meshpoint(){
 			commit wireless
 			commit network
 		EOF
+		uci set wireless.MeshPoint.mesh_id="$mesh_id"
+		uci set wireless.MeshPoint.network="$mesh_net"
 		}
 	else
 		{
 			uci del wireless.MeshPoint
-			uci commit wireless
 		}
 	fi
+	uci commit wireless
 	wifi	
 }
 
