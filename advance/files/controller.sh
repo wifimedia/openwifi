@@ -523,6 +523,23 @@ license_local() {
 	fi
 }
 
+_meshpoint(){
+	mesh_net=`uci -q get wifimedia.@wireless[0].network`
+	mesh_id=`uci -q get wifimedia.@wireless[0].mesh_id`
+	uci -q get wireless.MeshPoint || {
+		uci batch <<-EOF
+		set wireless.MeshPoint=wifi-iface
+		set wireless.MeshPoint.device=radio0
+		set wireless.MeshPoint.encryption=none
+		set wireless.MeshPoint.mode=mesh
+		set wireless.MeshPoint.mesh_id="$mesh_id"
+		set wireless.MeshPoint.mesh_fwding=1
+		set wireless.MeshPoint.network="$mesh_net"
+		set wireless.MeshPoint.ifname=PtP
+		commit
+	EOF
+	}	
+}
 rssi() {
 if [ $rssi_on == "1" ];then
 	level_defaults=-80
