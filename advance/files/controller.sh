@@ -320,15 +320,20 @@ _lic(){
 	license_srv
 }
 
+_meshpoint_status(){
+
+	if [ "$(cat /sys/class/net/$(uci get network.wan.ifname)/carrier)" -eq "1" ]; then
+		role="MeshPoint Off"
+	else
+		role="MeshPoint On"
+	fi
+}
 _nds(){ #Status Captive Portal
 	nodogsplash=`pidof nodogsplash`
 	if [ -z $nodogsplash ];then
-		_cpn="Offline"
-		echo $_cpn
-		
+		_cpn="Offline"		
 	else
 		_cpn="Online"
-		echo $_cpn
 	fi
 }
 
@@ -336,10 +341,11 @@ srv(){
 	token
 	monitor_port
 	heartbeat
+	_meshpoint_status
 	ip_public
 	_nds
 	diagnostics
-	wget -q --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}" "$link_config$_device" -O $response_file
+	wget -q --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}&role=${role}" "$link_config$_device" -O $response_file
 
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
