@@ -214,6 +214,15 @@ cat $response_file | while read line ; do
 		uci set dhcp.lan.limit="$value"
 	elif [  "$key" = "network.dhcp.leasetime" ];then
 		uci set dhcp.network.leasetime="$value"
+	###Mesh point
+		elif [  "$key" = "meshpoint.mesh_id" ];then
+		uci set wifimedia.MeshPoint.mesh_id=$value
+	elif [  "$key" = "meshpoint.network" ];then
+		uci set wifimedia.MeshPoint.network=$value
+	elif [  "$key" = "meshpoint.enable" ];then
+		uci set wifimedia.MeshPoint.enable=$value
+		echo "1" >/tmp/meshpoint
+	###heartbeat		
 	elif [  "$key" = "detectclient.uri" ];then
 		uci set wifimedia.@heartbeat[0].uri="$value"
 	elif [  "$key" = "heartbeat.uri" ];then
@@ -268,6 +277,11 @@ else
   /etc/init.d/firewall restart
   /etc/init.d/cron restart
   #service firewall restart
+fi
+
+if [ $(cat /tmp/meshpoint) -eq 1 ];then
+	_meshpoint
+	rm /tmp/meshpoint
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
