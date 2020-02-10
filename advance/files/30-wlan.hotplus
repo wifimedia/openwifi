@@ -1,5 +1,10 @@
 #!/bin/sh
 
+check_mesh=`cat /etc/config/wireless | grep 'mesh'`
+if [ -n "$check_mesh" ];then
+	exit 0
+fi	
+
 [ "$ACTION" = ifup ] || exit 0
 
 #LED:

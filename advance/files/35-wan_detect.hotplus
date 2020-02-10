@@ -3,6 +3,11 @@
 # Copyright © 2016 Wifimedia
 # All rights reserved
 
+check_mesh=`cat /etc/config/wireless | grep 'mesh'`
+if [ -n "$check_mesh" ];then
+	exit 0
+fi
+	
 [ "$ACTION" = ifup ] || exit 0
 
 # IP Hexor
