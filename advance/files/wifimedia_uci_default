@@ -75,7 +75,7 @@ uci batch <<-EOF
 EOF
 
 
-if [ "$newifi3" == "Newifi-D2" ];then
+if [ "$newifi3" == "Newifi-D2" ] || [ "$newifi3" == "ZBT-WE826" ];then
 	uci batch <<-EOF
 		set network.lan.ipaddr=172.16.99.1
 		set network.wan.type=bridge
