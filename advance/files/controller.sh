@@ -561,8 +561,8 @@ _meshpoint(){
 			set wireless.MeshPoint.ifname=PtP
 			commit wireless
 			commit network
-		EOF
-		uci set network.wan.stp="1"
+		EOF	
+		uci set network.$mesh_net.stp="1"
 		uci set wireless.MeshPoint.mesh_id="$mesh_id"
 		uci set wireless.MeshPoint.network="$mesh_net"
 		}
@@ -571,7 +571,7 @@ _meshpoint(){
 			uci del wireless.MeshPoint
 		}
 	fi
-	uci commit wireless
+	uci commit
 	wifi	
 }
 
