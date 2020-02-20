@@ -65,6 +65,8 @@ define Package/advance/install
 	$(INSTALL_DATA) ./files/switchmode_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/switchmode.lua
 	$(INSTALL_DATA) ./files/detect_clients_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/detect_clients.lua
 	$(INSTALL_DATA) ./files/detect_clients_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/detect_clients.lua
+	$(INSTALL_DATA) ./files/mesh_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/mesh.lua
+	$(INSTALL_DATA) ./files/mesh_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/mesh.lua	
 endef
 
 define Package/advance/conffiles
