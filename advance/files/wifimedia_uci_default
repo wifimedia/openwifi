@@ -84,6 +84,7 @@ if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND
 		#set wireless.@wifi-iface[0].encryption="psk2"
 		#set wireless.@wifi-iface[0].key="loopposA@"
 		set wireless.radio0.disabled=0
+		set wireless.radio0.channel=11
 		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
 		add_list wireless.radio0.ht_capab="SHORT-GI-20"
 		add_list wireless.radio0.ht_capab="SHORT-GI-40"
