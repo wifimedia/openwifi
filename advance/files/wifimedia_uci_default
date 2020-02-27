@@ -91,7 +91,7 @@ EOF
 		add_list wireless.radio0.ht_capab="RX-STBC1"
 		add_list wireless.radio0.ht_capab="DSSS_CCK-40"
 		set wireless.radio0.country="US"
-		set wireless.radio0.txpower=22
+		set wireless.radio0.txpower=21
 		commit wireless
 	EOF
 
