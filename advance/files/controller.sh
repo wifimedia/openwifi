@@ -151,19 +151,19 @@ cat $response_file | while read line ; do
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0 eth1.1"
+			uci set network.wan.ifname="eth0.1 eth1"
 		else
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
 			uci set network.lan.ipaddr="172.16.99.1"
 			uci set network.lan.netmask="255.255.255.0"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"
+			uci set network.lan.ifname="eth0.1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0"
+			uci set network.wan.ifname="eth1"
 		fi
 	#Cu hinh IP LAN
 	elif [ "$key" = "network.lan.static" ];then
@@ -171,7 +171,7 @@ cat $response_file | while read line ; do
 		uci delete network.lan >/dev/null 2>&1
 		uci set network.lan="interface"
 		uci set network.lan.type="bridge"	
-		uci set network.lan.ifname="eth1.1"
+		uci set network.lan.ifname="eth0.1"
 		if [ "$value" = "1" ];then ##Static 
 			uci set network.lan.proto="static"	
 		else ##DHCP Client nhan IP
