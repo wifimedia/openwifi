@@ -65,7 +65,7 @@ uci batch <<-EOF
 	set system.@system[0].timezone=ICT-7
 EOF
 
-if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND_v4" ] || [ "$model_hardware" == "CF-E320N_v2" ] || [ "$model_hardware" == "TL-WR940N_v4" ] || [ "$model_hardware" == "TL-WR940N_v6" ] || [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
+if [ "$model_hardware" == "TL-WA901ND_v4" ] || [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND_v4" ] || [ "$model_hardware" == "CF-E320N_v2" ] || [ "$model_hardware" == "TL-WR940N_v4" ] || [ "$model_hardware" == "TL-WR940N_v6" ] || [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
 	uci batch <<-EOF
 		set network.lan.ipaddr=172.16.99.1
 		#set network.lan.ipaddr=192.168.5.1
