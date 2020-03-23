@@ -613,7 +613,7 @@ _meshpoint(){
 
 	if [ $enable -eq 1 ];then 
 		uci -q get wireless.MeshPoint || {
-			uci batch <<-EOF
+		uci batch <<-EOF
 			set wireless.MeshPoint=wifi-iface
 			set wireless.MeshPoint.device=radio0
 			set wireless.MeshPoint.encryption=none
@@ -624,7 +624,8 @@ _meshpoint(){
 			set wireless.MeshPoint.ifname=PtP
 			commit wireless
 			commit network
-		EOF	
+		EOF
+	
 		uci set network.$mesh_net.stp="1"
 		uci set wireless.MeshPoint.mesh_id="$mesh_id"
 		uci set wireless.MeshPoint.network="$mesh_net"
