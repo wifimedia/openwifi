@@ -313,6 +313,11 @@ if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	echo "WIFI Online"
 fi
 
+if [ $(cat /tmp/meshpoint) -eq 1 ];then
+	_meshpoint
+	rm /tmp/meshpoint
+fi
+
 if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
 	echo "restarting the node"
 	 sleep 5 && reboot
