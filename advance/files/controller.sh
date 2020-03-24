@@ -3,8 +3,8 @@
 # All rights reserved.
 
 . /sbin/wifimedia/variables.sh
-diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
-touch /tmp/diagnostics_ip
+diag_file=/etc/config/diagnostics_ip #store data ip diagnostics from server monitor
+touch $diag_file
 touch /tmp/ports
 touch /tmp/client_connect_wlan
 touch /tmp/diagnostics_log
@@ -415,7 +415,7 @@ diagnostics(){
 	done
 	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
 	rm /tmp/diagnostics_log
-	rm $diag_file
+	#rm $diag_file
 }
 
 
@@ -468,6 +468,8 @@ get_client_connect_wlan(){
 	#	ip_opvn=`ifconfig tun0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }'`
 	#fi
 	#local _url=$1
+	touch /tmp/client_connect_wlan
+	touch /tmp/client_data
 	NEWLINE_IFS='
 '
 	OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
@@ -619,11 +621,10 @@ if [ $rssi_on == "1" ];then
 fi #END RSSI
 }
 
+_meshpoint(){
 mesh_net=`uci -q get wifimedia.MeshPoint.network`
 mesh_id=`uci -q get wifimedia.MeshPoint.mesh_id`
 enable=`uci -q get wifimedia.MeshPoint.enable`
-_meshpoint(){
-
 	if [ $enable -eq 1 ];then 
 		uci -q get wireless.MeshPoint || {
 		uci batch <<-EOF
