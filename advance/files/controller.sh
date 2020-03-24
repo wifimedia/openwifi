@@ -248,7 +248,15 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "detectclient.uri" ];then
 		uci set wifimedia.@heartbeat[0].uri="$value"
 	elif [  "$key" = "heartbeat.uri" ];then
-		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"				
+		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"
+###Mesh point
+	elif [  "$key" = "meshpoint.mesh_id" ];then
+		uci set wifimedia.MeshPoint.mesh_id=$value
+	elif [  "$key" = "meshpoint.network" ];then
+		uci set wifimedia.MeshPoint.network=$value
+	elif [  "$key" = "meshpoint.enable" ];then
+		uci set wifimedia.MeshPoint.enable=$value
+		echo "1" >/tmp/meshpoint
 	#Cau hinh Captive Portal
 	elif [  "$key" = "cpn.enable" ];then
 		echo $value >/tmp/cpn_flag
