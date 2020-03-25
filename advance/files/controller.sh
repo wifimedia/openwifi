@@ -4,8 +4,8 @@
 
 . /sbin/wifimedia/variables.sh
 
-diag_file=/tmp/diagnostics_ip #store data ip diagnostics from server monitor
-touch /tmp/diagnostics_ip
+diag_file=/etc/config/diagnostics_ip #store data ip diagnostics from server monitor
+touch $diag_file
 touch /tmp/ports
 touch /tmp/client_connect_wlan
 touch /tmp/diagnostics_log
@@ -390,7 +390,7 @@ diagnostics(){
 	done
 	diagnostics_resulte=$(cat /tmp/diagnostics_log | xargs | sed 's/ /;/g')
 	rm /tmp/diagnostics_log
-	rm $diag_file
+	#rm $diag_file
 }
 
 monitor_port(){
@@ -437,7 +437,7 @@ _get_server(){ # Connect to server Nextify
 }
 
 get_client_connect_wlan(){
-	local _url=$1
+	#local _url=$1
 	NEWLINE_IFS='
 '
 	OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
