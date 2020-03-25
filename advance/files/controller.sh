@@ -543,11 +543,11 @@ license_local() {
 	fi
 }
 
+_meshpoint(){
+
 mesh_net=`uci -q get wifimedia.MeshPoint.network`
 mesh_id=`uci -q get wifimedia.MeshPoint.mesh_id`
 enable=`uci -q get wifimedia.MeshPoint.enable`
-_meshpoint(){
-
 	if [ $enable -eq 1 ];then 
 		uci -q get wireless.MeshPoint || {
 			uci batch <<-EOF
