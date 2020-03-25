@@ -261,6 +261,15 @@ uci batch << EOF
 	set firewall.${LTE_ZONE}_fwd_lte_p.src=${NET_ID}
 	commit firewall
 EOF
+
+uci -q get wifimedia.MeshPoint || {
+	uci batch <<-EOF
+	set wifimedia.MeshPoint=mesh
+	set wifimedia.MeshPoint.enable=0
+	commit
+	EOF
+}
+
 #firewall
 #WWAN_ZONE="wwan"
 #WWAN_INT="wwan"
