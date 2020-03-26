@@ -6,10 +6,6 @@
 
 diag_file=/etc/config/diagnostics_ip #store data ip diagnostics from server monitor
 touch $diag_file
-touch /tmp/ports
-touch /tmp/client_connect_wlan
-touch /tmp/diagnostics_log
-touch /tmp/client_data
 #>/dev/null 2>&1
 #[ -z STRING ] means: if STRING is NULL then return TRUE (0)
 #[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
@@ -378,8 +374,8 @@ token(){
 }
 
 diagnostics(){
+	touch /tmp/diagnostics_log
 	ip=`cat $diag_file`
-
 	for i in $ip; do
 		ping -c 3 "$i" >/dev/null
 		if [ $? -eq "0" ];then
@@ -394,6 +390,7 @@ diagnostics(){
 }
 
 monitor_port(){
+	touch /tmp/ports
 	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |tail -4|head -5| while read line;do
 		echo "$line," >>/tmp/monitor_port
 	done
@@ -438,6 +435,7 @@ _get_server(){ # Connect to server Nextify
 
 get_client_connect_wlan(){
 	#local _url=$1
+	touch /tmp/client_data
 	NEWLINE_IFS='
 '
 	OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
