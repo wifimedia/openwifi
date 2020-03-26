@@ -6,9 +6,7 @@
 
 diag_file=/etc/config/diagnostics_ip #store data ip diagnostics from server monitor
 touch $diag_file
-touch /tmp/ports
-touch /tmp/client_connect_wlan
-touch /tmp/diagnostics_log
+
 #>/dev/null 2>&1
 #[ -z STRING ] means: if STRING is NULL then return TRUE (0)
 #[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
@@ -410,6 +408,7 @@ token(){
 }
 
 diagnostics(){
+	touch /tmp/diagnostics_log
 	ip=`cat $diag_file`
 
 	for i in $ip; do
@@ -459,6 +458,8 @@ _get_server(){ # Connect to server Nextify
 }
 
 get_client_connect_wlan(){
+	tmp_data="/tmp/client_data"
+	touch $tmp_data
 	local _url=$1
 	NEWLINE_IFS='
 '
@@ -476,7 +477,7 @@ get_client_connect_wlan(){
 					signal=$(echo $line | awk '{print $2 $3}' FS=" ")
 					data=";$mac"
 					echo $data >>/tmp/client_connect_wlan
-					echo "$mac;$signal">>/tmp/client_data
+					echo "$mac;$signal">>$tmp_data
 				fi
 			fi
 		done
@@ -486,7 +487,7 @@ get_client_connect_wlan(){
 	client_data=`cat /tmp/client_data`
 	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
 	rm /tmp/client_connect_wlan
-	rm /tmp/client_data
+	rm $tmp_data
 }
 
 action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
@@ -506,6 +507,7 @@ action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 
 disable_port(){
 	action_port='/tmp/ports'
+	touch $action_port
 	for i in $(cat $action_port); do
 		swconfig dev switch0 port $i set disable 1
 	done
