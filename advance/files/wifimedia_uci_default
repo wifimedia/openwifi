@@ -158,7 +158,7 @@ echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
 #Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root  #monitor
+echo '*/2 * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root  #monitor
 echo '* * * * * /sbin/wifimedia/controller.sh checking' >>/etc/crontabs/root
 #Info
 CODENAME="wifimedia"
