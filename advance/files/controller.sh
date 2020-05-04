@@ -465,6 +465,13 @@ action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 license_srv() {
 	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
 	#$_device: aa-bb-cc-dd-ee-ff
+	file=/etc/opt/Passcode
+	if [ -e $file ];then
+		echo "File exists"
+		exit 0
+	else
+		echo "File does not exist and return to find device"
+	fi		
 	echo "" > $licensekey
 	wget -q "${code_srv}" -O $licensekey
 	curl_result=$?
@@ -476,7 +483,9 @@ license_srv() {
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
 					echo "Activated" >/etc/opt/license/status
+					echo "Passcode" >/etc/opt/Passcode
 					license_local
+					rm $licensekey
 				fi
 			done	
 		fi
