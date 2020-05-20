@@ -45,7 +45,8 @@ chk = s:taboption( "advance",Value, "checkinterval","Checkinterval","Default: 10
 chk:depends({enable_cpn="1"})
 fb = s:taboption( "basic",Flag, "facebook","Bypass Facebook")
 fb:depends({enable_cpn="1"})
---s:taboption( "basic",Flag, "https","Bypass https")
+https = s:taboption( "basic",Flag, "https","Bypass https")
+https:depends({enable_cpn="1"})
 dhcpextension = s:taboption( "basic",Flag, "dhcpextension","DHCP Extension")
 dhcpextension.rmempty = false
 dhcpextension:depends({enable_cpn="1"})

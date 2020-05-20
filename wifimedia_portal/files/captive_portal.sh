@@ -95,17 +95,23 @@ config_captive_portal() {
 		fi			
 		while read line; do
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80 to $(echo $line)"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $line)"
 		done <$PREAUTHENTICATED_ADDRS
 
 		if [ "$facebook" == "1" ];then
 		while read fb; do
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80 to $(echo $fb)"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $fb)"
 		done <$PREAUTHENTICATED_ADDR_FB
 		fi
-
+		if [ "$https" == "1" ];then ##For ALL 443
+			while read line; do
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $line)"
+			done <$PREAUTHENTICATED_ADDRS
+		fi
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 22"
 		#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
+		#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"	
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 22"
