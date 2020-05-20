@@ -240,6 +240,8 @@ cat $response_file | while read line ; do
 	# uci set wifimedia.@nodogsplash[0].network="$value"		
 	elif [  "$key" = "cpn.fb" ];then
 		uci set wifimedia.@nodogsplash[0].facebook="$value"
+	elif [  "$key" = "cpn.https" ];then
+		uci set wifimedia.@nodogsplash[0].https="$value"		
 	elif [  "$key" = "cpn.dhcpextenal" ];then
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 		uci commit
