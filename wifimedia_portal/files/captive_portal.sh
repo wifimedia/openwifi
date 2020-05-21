@@ -105,9 +105,10 @@ config_captive_portal() {
 			done <$PREAUTHENTICATED_ADDR_FB
 		fi
 		if [ "$https" == "1" ];then ##For ALL 443
-			while read line; do
-				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $line)"
-			done <$PREAUTHENTICATED_ADDRS
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
+			#while read line; do
+			#	uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $line)"
+			#done <$PREAUTHENTICATED_ADDRS
 		fi
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 22"
 		#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80"
