@@ -9,6 +9,60 @@ touch $diag_file
 #>/dev/null 2>&1
 #[ -z STRING ] means: if STRING is NULL then return TRUE (0)
 #[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
+
+start_cfg(){
+
+	touch /tmp/reboot_flag
+	touch /tmp/network_flag
+	touch /tmp/cpn_flag
+	touch /tmp/scheduled_flag
+	touch /tmp/clientdetect
+	local key
+	local value
+	cat $response_file | while read line ; do
+		key=$(echo $line | cut -f 1 -d =)
+		value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
+		
+		#config device
+		cfg_device
+
+		#Cau hinh wireless 2.4
+	    cfg_device_wireless
+
+		##Cau hinh switch 5 port		
+		cfg_device_sw
+
+		#Cu hinh IP LAN
+		cfg_device_net
+
+		#config captive portal
+		cfg_device_portal
+	##
+	done	
+	uci commit
+	check_cpn_flag
+	check_meshpont_flag
+	check_network_flag
+	check_reboot_flag
+}
+
+start_cfg_group(){
+
+	touch /tmp/network_flag
+	local key
+	local value
+	cat $response_file_group | while read line ; do
+		key=$(echo $line | cut -f 1 -d =)
+		value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
+		
+		#Cau hinh wireless 2.4
+	    cfg_device_wireless
+	##
+	done	
+	uci commit
+	check_network_flag
+}
+
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	echo $PUBLIC_IP
@@ -69,19 +123,9 @@ checking (){
 	#pidhostapd=`pidof hostapd`
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
-start_cfg(){
 
-touch /tmp/reboot_flag
-touch /tmp/network_flag
-touch /tmp/cpn_flag
-touch /tmp/scheduled_flag
-touch /tmp/clientdetect
-local key
-local value
-cat $response_file | while read line ; do
-	key=$(echo $line | cut -f 1 -d =)
-	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
-	
+cfg_device(){
+
 	#Cau hinh hostname
 	if [ "$key" = "device.hostname" ];then
 		uci set system.@system[0].hostname="$value"
@@ -97,8 +141,22 @@ cat $response_file | while read line ; do
 		if [ "$value" =  "1" ];then
 			jffs2reset -y && reboot
 		fi	
-	#Cau hinh wireless 2.4
-	elif [ "$key" = "wireless.radio2G.enable" ];then
+	#Cau hinh auto reboot
+	elif [  "$key" = "scheduletask.enable" ];then
+		echo $value >/tmp/scheduled_flag
+	elif [  "$key" = "scheduletask.hours" ];then
+		uci set scheduled.@times[0].hour="$value"
+	elif [  "$key" = "scheduletask.minute" ];then
+		uci set scheduled.@times[0].minute="$value"
+	elif [ "$key" =  "network.diagnostics" ]; then
+		value=$(echo $value | sed 's/,/ /g')
+		echo $value >$diag_file		
+	fi			
+}
+
+cfg_device_wireless(){
+
+	if [ "$key" = "wireless.radio2G.enable" ];then
 		echo 1 >/tmp/network_flag
 		uci set wireless.radio0.disabled="$value"
 		echo $value
@@ -139,8 +197,11 @@ cat $response_file | while read line ; do
 	#Set Max Client	
 	elif [ "$key" = "wireless.maxclients2G" ];then
 		uci set wireless.default_radio0.maxassoc="$value"
-	##Cau hinh switch 5 port		
-	elif [ "$key" = "network.switch" ];then
+	fi	
+}
+
+cfg_device_sw(){
+	if [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
 		uci set wireless.default_radio0.network="wan"
 		uci set wifimedia.@switchmode[0].switch_port="$value"		
@@ -161,8 +222,12 @@ cat $response_file | while read line ; do
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
 			uci set network.wan.ifname="eth0"
 		fi
-	#Cu hinh IP LAN
-	elif [ "$key" = "network.lan.static" ];then
+	fi	
+}
+
+cfg_device_net(){
+
+	if [ "$key" = "network.lan.static" ];then
 		echo 1 >/tmp/network_flag
 		uci delete network.lan >/dev/null 2>&1
 		uci set network.lan="interface"
@@ -218,8 +283,12 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "meshpoint.enable" ];then
 		uci set wifimedia.MeshPoint.enable=$value
 		echo "1" >/tmp/meshpoint
+	fi		
+}
+
+cfg_device_portal(){
 	###heartbeat		
-	elif [  "$key" = "detectclient.uri" ];then
+	if [  "$key" = "detectclient.uri" ];then
 		uci set wifimedia.@heartbeat[0].uri="$value"
 	elif [  "$key" = "heartbeat.uri" ];then
 		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"			
@@ -246,53 +315,48 @@ cat $response_file | while read line ; do
 		uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 		uci commit
 		/sbin/wifimedia/captive_portal.sh dhcp_extension
-	#Cau hinh auto reboot
-	elif [  "$key" = "scheduletask.enable" ];then
-		echo $value >/tmp/scheduled_flag
-	elif [  "$key" = "scheduletask.hours" ];then
-		uci set scheduled.@times[0].hour="$value"
-	elif [  "$key" = "scheduletask.minute" ];then
-		uci set scheduled.@times[0].minute="$value"
-	elif [ "$key" =  "network.diagnostics" ]; then
-		value=$(echo $value | sed 's/,/ /g')
-		echo $value >$diag_file		
+	fi		
+}
+
+check_cpn_flag(){
+	if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
+		echo "Config & Start Captive Portal"
+		/sbin/wifimedia/captive_portal.sh config_captive_portal
+		/etc/init.d/nodogsplash enable
+		echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
+		/etc/init.d/cron restart
+		rm /tmp/cpn_flag
+	else
+	  echo "Stop Captive Portal"
+	  /etc/init.d/nodogsplash disable
+	  echo ''>/etc/crontabs/nds
+	  /etc/init.d/firewall restart
+	  /etc/init.d/cron restart
+	  #service firewall restart
 	fi
-##
-done	
-uci commit
+}
 
-if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
-	echo "Config & Start Captive Portal"
-	/sbin/wifimedia/captive_portal.sh config_captive_portal
-	/etc/init.d/nodogsplash enable
-	echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
-	/etc/init.d/cron restart
-	rm /tmp/cpn_flag
-else
-  echo "Stop Captive Portal"
-  /etc/init.d/nodogsplash disable
-  echo ''>/etc/crontabs/nds
-  /etc/init.d/firewall restart
-  /etc/init.d/cron restart
-  #service firewall restart
-fi
+check_meshpont_flag(){
+	if [ $(cat /tmp/meshpoint) -eq 1 ];then
+		_meshpoint
+		rm /tmp/meshpoint
+	fi
+}
 
-if [ $(cat /tmp/meshpoint) -eq 1 ];then
-	_meshpoint
-	rm /tmp/meshpoint
-fi
+check_network_flag(){
+	if [ $(cat /tmp/network_flag) -eq 1 ]; then
+		wifi down && wifi up
+		/etc/init.d/network restart
+		rm /tmp/network_flag
+		echo "WIFI Online"
+	fi
+}
 
-if [ $(cat /tmp/network_flag) -eq 1 ]; then
-	wifi down && wifi up
-	/etc/init.d/network restart
-	rm /tmp/network_flag
-	echo "WIFI Online"
-fi
-
-if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
-	echo "restarting the node"
-	 sleep 5 && reboot
-fi	
+check_reboot_flag(){
+	if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
+		echo "restarting the node"
+		 sleep 5 && reboot
+	fi
 }
 
 _boot(){
