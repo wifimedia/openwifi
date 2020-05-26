@@ -9,7 +9,50 @@ touch $diag_file
 #>/dev/null 2>&1
 #[ -z STRING ] means: if STRING is NULL then return TRUE (0)
 #[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
+srv(){
+	token
+	monitor_port
+	heartbeat
+	_meshpoint_status
+	ip_public
+	_nds
+	diagnostics
+	wget -q --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}&role=${role}" "$link_config$_device" -O $response_file
 
+	#echo "Token "$token
+	#echo "AP MAC "$global_device
+	#echo "mac_clients "$client_connect_wlan
+	#echo "ports_data "$ports_data
+	curl_result=$?
+	curl_data=$(cat $response_file)
+	if [ "$curl_result" -eq "0" ]; then
+		echo "Checked in to the dashboard successfully,"
+	
+		if grep -q "." $response_file; then
+			echo "we have new settings to apply!"
+		else
+			echo "we will maintain the existing settings."
+			exit
+		fi	
+	else
+		logger "WARNING: Could not checkin to the dashboard."
+		echo "WARNING: Could not checkin to the dashboard."
+		exit
+	fi
+	start_cfg	
+}
+
+cfg_group_start(){
+	wget -q url="http://local.wifimedia.vn/luci-static/resources/groups.txt" -o  $response_file_group #remot_config
+	#check md5 file 
+	#if file_new != file_old then
+		#copy file_new to file_old
+	#else
+		#exit
+	#end	
+
+	start_cfg_group
+}
 start_cfg(){
 
 	touch /tmp/reboot_flag
@@ -399,38 +442,6 @@ _nds(){ #Status Captive Portal
 	fi
 }
 
-srv(){
-	token
-	monitor_port
-	heartbeat
-	_meshpoint_status
-	ip_public
-	_nds
-	diagnostics
-	wget -q --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}&role=${role}" "$link_config$_device" -O $response_file
-
-	#echo "Token "$token
-	#echo "AP MAC "$global_device
-	#echo "mac_clients "$client_connect_wlan
-	#echo "ports_data "$ports_data
-	curl_result=$?
-	curl_data=$(cat $response_file)
-	if [ "$curl_result" -eq "0" ]; then
-		echo "Checked in to the dashboard successfully,"
-	
-		if grep -q "." $response_file; then
-			echo "we have new settings to apply!"
-		else
-			echo "we will maintain the existing settings."
-			exit
-		fi	
-	else
-		logger "WARNING: Could not checkin to the dashboard."
-		echo "WARNING: Could not checkin to the dashboard."
-		exit
-	fi
-	start_cfg	
-}
 token(){
 	#token = sha256(mac+secret)
 	secret="(C)WifiMedia2019"
