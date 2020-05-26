@@ -47,7 +47,7 @@ cfg_group_start(){
 	response_file_group_old=/etc/config/cfg_device_old
 	touch $response_file_group_new
 	touch $response_file_group_old
-	wget -q url="http://local.wifimedia.vn/luci-static/resources/groups.txt" -o  $response_file_group_new #remot_config
+	wget -q url="http://local.wifimedia.vn/luci-static/resources/groups.txt" -O  $response_file_group_new #remot_config
 	#check md5 file 
 	#if file_new != file_old then
 		#copy file_new to file_old
