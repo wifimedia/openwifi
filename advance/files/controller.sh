@@ -127,19 +127,20 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
-start_cfg(){
+cfg-group(){
+	touch /tmp/network_flag
+	local key
+	local value
+	cat $response_file | while read line ; do
+		key=$(echo $line | cut -f 1 -d =)
+		value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
 
-touch /tmp/reboot_flag
-touch /tmp/network_flag
-touch /tmp/cpn_flag
-touch /tmp/scheduled_flag
-touch /tmp/clientdetect
-local key
-local value
-cat $response_file | while read line ; do
-	key=$(echo $line | cut -f 1 -d =)
-	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
-	
+		cfg_device_wireless
+	done	
+}
+
+
+cfg_device(){
 	#Cau hinh hostname
 	if [ "$key" = "device.hostname" ];then
 		uci set system.@system[0].hostname="$value"
@@ -154,9 +155,25 @@ cat $response_file | while read line ; do
 	elif [ "$key" = "device.factoryreset" ];then
 		if [ "$value" =  "1" ];then
 			jffs2reset -y && reboot
-		fi	
-	#Cau hinh wireless 2.4
-	elif [ "$key" = "wireless.radio2G.enable" ];then
+		fi
+	fi
+	#Cau hinh auto reboot
+	elif [  "$key" = "scheduletask.enable" ];then
+		echo $value >/tmp/scheduled_flag
+	elif [  "$key" = "scheduletask.hours" ];then
+		uci set scheduled.@times[0].hour="$value"
+	elif [  "$key" = "scheduletask.minute" ];then
+		uci set scheduled.@times[0].minute="$value"
+	elif [ "$key" =  "network.diagnostics" ]; then
+		value=$(echo $value | sed 's/,/ /g')
+		echo $value >$diag_file		
+	fi
+}
+
+cfg_device_wireless(){
+
+		#Cau hinh wireless 2.4
+	if [ "$key" = "wireless.radio2G.enable" ];then
 		echo 1 >/tmp/network_flag
 		uci set wireless.radio0.disabled="$value"
 		echo $value
@@ -197,8 +214,12 @@ cat $response_file | while read line ; do
 	#Set Max Client	
 	elif [ "$key" = "wireless.maxclients2G" ];then
 		uci set wireless.default_radio0.maxassoc="$value"
+	fi	
+}
+
+cfg_device_sw(){
 	##Cau hinh switch 5 port		
-	elif [ "$key" = "network.switch" ];then
+	if [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
 		uci set wireless.@wifi-iface[0].network="wan"
 		uci set wifimedia.@switchmode[0].switch_port="$value"		
@@ -219,8 +240,12 @@ cat $response_file | while read line ; do
 			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
 			uci set network.wan.ifname="eth0.2"
 		fi
+	fi	
+}
+
+cfg_device_net(){
 	#Cu hinh IP LAN
-	elif [ "$key" = "network.lan.static" ];then
+	if [ "$key" = "network.lan.static" ];then
 		echo 1 >/tmp/network_flag
 		uci delete network.lan >/dev/null 2>&1
 		uci set network.lan="interface"
@@ -271,9 +296,14 @@ cat $response_file | while read line ; do
 	elif [  "$key" = "detectclient.uri" ];then
 		uci set wifimedia.@heartbeat[0].uri="$value"
 	elif [  "$key" = "heartbeat.uri" ];then
-		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"			
+		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"
+	fi	
+}
+
+cfg_device_portal(){
+
 	#Cau hinh Captive Portal
-	#elif [  "$key" = "cpn.enable" ];then
+	#if [  "$key" = "cpn.enable" ];then
 	#	echo $value >/tmp/cpn_flag
 	#	uci set nodogsplash.@nodogsplash[0].enabled="$value"
 	#	uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
@@ -293,17 +323,34 @@ cat $response_file | while read line ; do
 	#	uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
 	#	uci commit
 	#	/sbin/wifimedia/captive_portal.sh dhcp_extension
-	#Cau hinh auto reboot
-	elif [  "$key" = "scheduletask.enable" ];then
-		echo $value >/tmp/scheduled_flag
-	elif [  "$key" = "scheduletask.hours" ];then
-		uci set scheduled.@times[0].hour="$value"
-	elif [  "$key" = "scheduletask.minute" ];then
-		uci set scheduled.@times[0].minute="$value"
-	elif [ "$key" =  "network.diagnostics" ]; then
-		value=$(echo $value | sed 's/,/ /g')
-		echo $value >$diag_file		
-	fi
+	#fi
+}
+start_cfg(){
+
+touch /tmp/reboot_flag
+touch /tmp/network_flag
+touch /tmp/cpn_flag
+touch /tmp/scheduled_flag
+touch /tmp/clientdetect
+local key
+local value
+cat $response_file | while read line ; do
+	key=$(echo $line | cut -f 1 -d =)
+	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
+	#config device
+	cfg_device
+
+	#config wireless
+	cfg_device_wireless
+
+	#config switch 5 port
+    cfg_device_sw
+
+	#config device network
+	cfg_device_net
+
+	#config portal
+	cfg_device_portal
 ##
 done	
 uci commit
