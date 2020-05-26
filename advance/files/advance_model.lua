@@ -27,7 +27,58 @@ s.addremove = false
 --[Auto config AP]--
 s:tab("groups","Groups config")
 cfg_en = s:taboption("groups",Flag,"cfg_enable")
-ssid = s:taboption("groups",value,"essid","ESSID")	
+ssid = s:taboption("groups",value,"essid","ESSID")
+ssid:depends({cfg_enable=1})
+
+cfg_mod = s:taboption("groups", ListValue, "mode", "MODE")
+cfg_mod:value("ap", "AP")
+cfg_mod:value("mesh","MESH")
+cfg_mod:value("wds","WDS")
+cfg_mod:depends({cfg_enable="1"})
+
+cfg_ch = s:taboption("groups", ListValue,"channel", "Channel")
+local  channel = 1
+while (channel < 13) do
+	cfg_ch:value(channel, channel .. "")
+	channel = channel + 1
+end
+cfg_ch.default = "6"
+cfg_ch:depends({cfg_enable = "1"})
+
+cfg__max = s:taboption("groups", Value, "maxassoc", "Connection Limit")
+cfg__max:depends({cfg_enable="1"})
+
+cfg_net = s:taboption("groups", ListValue, "Network")
+cfg_net:value("wan", "WAN")
+cfg_net:value("lan", "LAN")
+cfg_net:depends({cfg_enable="1"})
+
+cfg_enc = s:taboption("groups", ListValue, "encrypt", "Wireless Security")
+cfg_enc:value("","No Encryption")
+cfg_enc:value("encryption","WPA-PSK/WPA2-PSK")
+cfg_enc:depends({cfg_enable="1"})
+
+--password
+cfg_passwd = s:taboption("groups",Value,"password","Password")
+cfg_passwd.datatype = "wpakey"
+cfg_passwd.rmempty = true
+cfg_passwd.password = true
+cfg_passwd:depends({cfg_enable="1"})
+--roaming
+cfg_r = s:taboption("groups",ListValue, "ft", "Fast Roaming")
+cfg_r:value("rsn_preauth","Fast-Secure Roaming")
+cfg_r:value("ieee80211r","Fast Roaming 802.11R")
+cfg_r:depends({encrypt="encryption"})
+
+cfg_r_pmk = s:taboption("groups",Flag,"ft_psk_generate_local","Generate PMK Locally")
+cfg_r_pmk:depends({ft="ieee80211r"})
+cfg_r_pmk.rmempty = false
+
+--isolation--
+cfg_iso = s:taboption("groups",Flag, "isolation","AP Isolation")
+cfg_iso.rmempty = false
+cfg_iso:depends({cfg_enable="1"})
+
 --RSSI--
 s:tab("rssi",  translate("RSSI"))
 	--s:taboption("rssi", Value, "pinginterval","Interval (s)").placeholder = "interval"
