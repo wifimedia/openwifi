@@ -35,3 +35,16 @@ ip_lan=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 #echo "Waiting a bit..."
 #sleep $(head -30 /dev/urandom | tr -dc "0123456789" | head -c1)
 if [ ! -d "/tmp/upgrade" ]; then mkdir /tmp/upgrade; fi
+
+#cfg_groups
+cfg_enable=`uci -q get wifimedia.@wireless[0].cfg_enable` 
+ssid=`uci -q get wifimedia.@wireless[0].essid`
+mode=`uci -q get wifimedia.@wireless[0].mode`
+channel=`uci -q get wifimedia.@wireless[0].channel`
+maxassoc=`uci -q get wifimedia.@wireless[0].maxassoc`
+net=`uci -q get wifimedia.@wireless[0].net`
+encrypt=`uci -q get wifimedia.@wireless[0].encrypt`
+password=`uci -q get wifimedia.@wireless[0].password`
+ft=`uci -q get wifimedia.@wireless[0].ft`
+ft_psk_generate_local=`uci -q get wifimedia.@wireless[0].ft_psk_generate_local`
+isolation=`uci -q get wifimedia.@wireless[0].isolation`
