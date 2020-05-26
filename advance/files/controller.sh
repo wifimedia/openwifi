@@ -43,14 +43,22 @@ srv(){
 }
 
 cfg_group_start(){
-	wget -q url="http://local.wifimedia.vn/luci-static/resources/groups.txt" -o  $response_file_group #remot_config
+	response_file_group_new=/etc/config/cfg_device_new
+	response_file_group_old=/etc/config/cfg_device_old
+	touch $response_file_group_new
+	touch $response_file_group_old
+	wget -q url="http://local.wifimedia.vn/luci-static/resources/groups.txt" -o  $response_file_group_new #remot_config
 	#check md5 file 
 	#if file_new != file_old then
 		#copy file_new to file_old
 	#else
 		#exit
 	#end	
-
+	if [ $(sha256sum $response_file_group_new | awk '{print $1}') != $(sha256sum $response_file_group_old | awk '{print $1}') ];then
+		cat $response_file_group_new >$response_file_group_old
+	else
+		exist
+	fi		
 	start_cfg_group
 }
 start_cfg(){
@@ -94,7 +102,7 @@ start_cfg_group(){
 	touch /tmp/network_flag
 	local key
 	local value
-	cat $response_file_group | while read line ; do
+	cat $response_file_group_new | while read line ; do
 		key=$(echo $line | cut -f 1 -d =)
 		value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
 		
