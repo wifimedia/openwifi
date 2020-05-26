@@ -24,7 +24,10 @@ end
 s = m:section(TypedSection, "wireless","")
 s.anonymous = true
 s.addremove = false
-		
+--[Auto config AP]--
+s:tab("groups","Groups config")
+cfg_en = s:taboption("groups",Flag,"cfg_enable")
+ssid = s:taboption("groups",value,"essid","ESSID")	
 --RSSI--
 s:tab("rssi",  translate("RSSI"))
 	--s:taboption("rssi", Value, "pinginterval","Interval (s)").placeholder = "interval"
