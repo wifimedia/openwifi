@@ -21,6 +21,7 @@ rssi_on=$(uci -q get wifimedia.@advance[0].enable)
 hardware=/tmp/upgrade/hardware
 version=/tmp/upgrade/version
 response_file=/tmp/wifimedia_cfg
+response_file_group=/tmp/wifimedia_cfg_group
 touch $response_file
 hash256=$(sha256sum $response_file | awk '{print $1}')
 device_fw=$(cat /sys/class/ieee80211/phy0/macaddress |sed 's/:/-/g' | tr a-z A-Z)
