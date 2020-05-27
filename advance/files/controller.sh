@@ -10,6 +10,278 @@ touch $diag_file
 #>/dev/null 2>&1
 #[ -z STRING ] means: if STRING is NULL then return TRUE (0)
 #[ -n STRING ] means: if STRING is not NULL then return TRUE (0)
+srv(){
+	token
+	monitor_port
+	heartbeat
+	ip_public
+	_nds
+	diagnostics
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}" "$link_config$_device" -O $response_file
+
+	curl_result=$?
+	curl_data=$(cat $response_file)
+	if [ "$curl_result" -eq "0" ]; then
+		echo "Checked in to the dashboard successfully,"
+	
+		if grep -q "." $response_file; then
+			echo "we have new settings to apply!"
+		else
+			echo "we will maintain the existing settings."
+			exit
+		fi	
+	else
+		logger "WARNING: Could not checkin to the dashboard."
+		echo "WARNING: Could not checkin to the dashboard."
+		exit
+	fi
+	start_cfg	
+}
+
+start_cfg(){
+
+	touch /tmp/reboot_flag
+	touch /tmp/network_flag
+	touch /tmp/cpn_flag
+	touch /tmp/scheduled_flag
+	touch /tmp/clientdetect
+	local key
+	local value
+	cat $response_file | while read line ; do
+		key=$(echo $line | cut -f 1 -d =)
+		value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
+		
+		#Config Device AP
+		cfg_device
+		#Config Wireless 
+		cfg_device_wireless
+		##Goups 5 Port for Switch		
+		cfg_device_sw
+		#Config LAN/WAN Device AP
+		cfg_device_net
+		#Cau hinh Captive Portal
+		#cfg_device_portal
+	##
+	done	
+	uci commit
+	#check_cpn_flag
+	check_network_flag
+	check_reboot_flag
+}
+
+cfg_device(){
+
+	if [ "$key" = "device.hostname" ];then
+		uci set system.@system[0].hostname="$value"
+		echo $value
+	#Mat khau thiet bi	
+	elif [ "$key" = "device.passwd" ];then
+		echo -e "$value\n$value" | passwd root
+	#Reboot device	
+	elif [ "$key" = "device.reboot" ];then
+		echo $value >/tmp/reboot_flag
+	#Reset defaults	
+	elif [ "$key" = "device.factoryreset" ];then
+		if [ "$value" =  "1" ];then
+			jffs2reset -y && reboot
+		fi
+	elif [  "$key" = "detectclient.uri" ];then
+		uci set wifimedia.@heartbeat[0].uri="$value"
+	elif [  "$key" = "heartbeat.uri" ];then
+		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"
+	#Cau hinh auto reboot
+	elif [  "$key" = "scheduletask.enable" ];then
+		echo $value >/tmp/scheduled_flag
+	elif [  "$key" = "scheduletask.hours" ];then
+		uci set scheduled.@times[0].hour="$value"
+	elif [  "$key" = "scheduletask.minute" ];then
+		uci set scheduled.@times[0].minute="$value"
+	elif [ "$key" =  "network.diagnostics" ]; then
+		value=$(echo $value | sed 's/,/ /g')
+		echo $value >$diag_file		
+	fi		
+}
+
+cfg_device_wireless(){
+	if [ "$key" = "wireless.radio2G.enable" ];then
+		echo 1 >/tmp/network_flag
+		uci set wireless.radio0.disabled="$value"
+		echo $value
+	elif [ "$key" = "wireless.radio2G.channel" ];then
+		uci set wireless.radio0.channel="$value"
+	elif [ "$key" = "wireless.radio2G.htmode" ];then
+		value=$(echo $value | tr a-z A-Z)
+		uci set wireless.radio0.htmode="$value"
+	elif [ "$key" = "wireless.radio2G.txpower" ];then
+		uci set wireless.radio0.txpower="$value"
+	elif [ "$key" = "wireless.ssid2G" ];then
+		uci set wireless.default_radio0.ssid="$value"
+	elif [ "$key" = "wireless.passwd2G" ];then
+		if [ "$value" = "" ];then
+			uci set wireless.default_radio0.key=""
+			uci set wireless.default_radio0.encryption="none"
+		else
+			uci set wireless.default_radio0.key="$value"
+			uci set wireless.default_radio0.encryption="psk2"
+		fi
+	#chuyen dung chuan cache	
+	elif [ "$key" = "wireless.okc2G" ];then
+			uci set wireless.default_radio0.rsn_preauth="$value"
+			uci delete wireless.default_radio0.ieee80211r >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_over_ds >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_psk_generate_local >/dev/null 2>&1
+	#Chuyen dung 802.1R	
+	elif [ "$key" = "wireless.ft2G" ];then
+		if [ "$value" =  "1" ];then
+			uci delete wireless.default_radio0.rsn_preauth >/dev/null 2>&1
+			uci set wireless.default_radio0.ieee80211r="1"
+			uci set wireless.default_radio0.ft_over_ds="1"
+			uci set wireless.default_radio0.ft_psk_generate_local="1"
+		fi	
+	##Map SSID to net/plain LAN or WAN	
+	elif [ "$key" = "wireless.network2G" ];then
+		uci set wireless.default_radio0.network="$value"
+	#Set Max Client	
+	elif [ "$key" = "wireless.maxclients2G" ];then
+		uci set wireless.default_radio0.maxassoc="$value"
+	fi	
+
+}
+cfg_device_sw(){
+	if [ "$key" = "network.switch" ];then
+		echo 1 >/tmp/network_flag
+		uci set wireless.@wifi-iface[0].network="wan"
+		uci set wifimedia.@switchmode[0].switch_port="$value"		
+		if [ "$value" = "1" ];then
+			uci delete network.lan >/dev/null 2>&1
+			uci set network.wan.proto="dhcp"
+			uci set network.wan.ifname="eth0.1 eth0.2"
+		else
+			uci set network.lan="interface"
+			uci set network.lan.proto="static"
+			uci set network.lan.ipaddr="192.168.5.1"
+			uci set network.lan.netmask="255.255.255.0"
+			uci set network.lan.type="bridge"
+			uci set network.lan.ifname="eth0.1"
+			uci set dhcp.lan.force="1"
+			uci set dhcp.lan.netmask="255.255.255.0"
+			uci del dhcp.lan.dhcp_option
+			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
+			uci set network.wan.ifname="eth0.2"
+		fi
+	fi
+}
+
+cfg_device_net(){
+	if [ "$key" = "network.lan.static" ];then
+		echo 1 >/tmp/network_flag
+		uci delete network.lan >/dev/null 2>&1
+		uci set network.lan="interface"
+		uci set network.lan.type="bridge"	
+		uci set network.lan.ifname="eth0.1"
+		if [ "$value" = "1" ];then ##Static 
+			uci set network.lan.proto="static"	
+		else ##DHCP Client nhan IP
+			uci set network.lan.proto="dhcp"	
+		fi
+	elif [  "$key" = "network.lan.ip" ];then
+		uci set network.lan.ipaddr="$value"
+	elif [  "$key" = "network.lan.subnetmask" ];then
+		uci set network.lan.netmask="$value"
+	elif [  "$key" = "network.lan.gateway" ];then
+		uci set network.lan.gateway="$value"		
+	elif [  "$key" = "network.lan.dns" ];then
+		value=$(echo $value | sed 's/,/ /g')
+		uci set network.lan.dns="$value"		
+	###WAN config
+	elif [ "$key" = "network.wan.static" ];then
+		echo 1 >/tmp/network_flag
+		uci delete network.wan >/dev/null 2>&1
+		uci set network.wan="interface"
+		uci set network.wan.type="bridge"	
+		uci set network.wan.ifname="eth0.2"				
+		if [ "$value" = "1" ];then ##Static 
+			uci set network.wan.proto="static"
+		else ##DHCP Client nhan IP
+			uci set network.wan.proto="dhcp"	
+		fi
+	elif [  "$key" = "network.wan.ip" ];then
+		uci set network.wan.ipaddr="$value"
+	elif [  "$key" = "network.wan.subnetmask" ];then
+		uci set network.wan.netmask="$value"
+	elif [  "$key" = "network.wan.gateway" ];then
+		uci set network.wan.gateway="$value"		
+	elif [  "$key" = "network.wan.dns" ];then
+		value=$(echo $value | sed 's/,/ /g')
+		uci set network.wan.dns="$value"		
+	##Cau hinh DHCP
+	elif [  "$key" = "network.dhcp.start" ];then
+		uci set dhcp.lan.start="$value"
+	elif [  "$key" = "network.dhcp.limit" ];then
+		uci set dhcp.lan.limit="$value"
+	elif [  "$key" = "network.dhcp.leasetime" ];then
+		uci set dhcp.network.leasetime="$value"
+	fi		
+}
+
+cfg_device_portal(){
+	#if [  "$key" = "cpn.enable" ];then
+	#	echo $value >/tmp/cpn_flag
+	#	uci set nodogsplash.@nodogsplash[0].enabled="$value"
+	#	uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
+	#	uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
+	#	uci set wifimedia.@nodogsplash[0].network="lan"		
+	#elif [  "$key" = "cpn.domain" ];then
+	#	uci set wifimedia.@nodogsplash[0].domain="$value"
+	#elif [  "$key" = "cpn.walledgarden" ];then
+	#	value=$(echo $value | sed 's/,/ /g')
+	#	uci set wifimedia.@nodogsplash[0].preauthenticated_users="$value"
+	#Network
+	#elif [  "$key" = "cpn.network" ];then
+	# uci set wifimedia.@nodogsplash[0].network="$value"		
+	#elif [  "$key" = "cpn.fb" ];then
+	#	uci set wifimedia.@nodogsplash[0].facebook="$value"
+	#elif [  "$key" = "cpn.dhcpextenal" ];then
+	#	uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
+	#	uci commit
+	#	/sbin/wifimedia/captive_portal.sh dhcp_extension
+	#fi
+
+}
+
+#check_cpn_flag(){
+#if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
+#	echo "Config & Start Captive Portal"
+#	/sbin/wifimedia/captive_portal.sh config_captive_portal
+#	/etc/init.d/nodogsplash enable
+#	echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
+#	/etc/init.d/cron restart
+#	rm /tmp/cpn_flag
+#else
+#  echo "Stop Captive Portal"
+#  /etc/init.d/nodogsplash disable
+#  echo ''>/etc/crontabs/nds
+#  /etc/init.d/firewall restart
+#  /etc/init.d/cron restart
+  #service firewall restart
+#fi
+#}
+check_network_flag(){
+	if [ $(cat /tmp/network_flag) -eq 1 ]; then
+		wifi down && wifi up
+		/etc/init.d/network restart
+		rm /tmp/network_flag
+		echo "WIFI Online"
+	fi
+}
+
+check_reboot_flag(){
+	if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
+		echo "restarting the node"
+		 sleep 5 && reboot
+	fi
+}
+
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	echo $PUBLIC_IP
@@ -127,216 +399,6 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
-start_cfg(){
-
-touch /tmp/reboot_flag
-touch /tmp/network_flag
-touch /tmp/cpn_flag
-touch /tmp/scheduled_flag
-touch /tmp/clientdetect
-local key
-local value
-cat $response_file | while read line ; do
-	key=$(echo $line | cut -f 1 -d =)
-	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
-	
-	#Cau hinh hostname
-	if [ "$key" = "device.hostname" ];then
-		uci set system.@system[0].hostname="$value"
-		echo $value
-	#Mat khau thiet bi	
-	elif [ "$key" = "device.passwd" ];then
-		echo -e "$value\n$value" | passwd root
-	#Reboot device	
-	elif [ "$key" = "device.reboot" ];then
-		echo $value >/tmp/reboot_flag
-	#Reset defaults	
-	elif [ "$key" = "device.factoryreset" ];then
-		if [ "$value" =  "1" ];then
-			jffs2reset -y && reboot
-		fi	
-	#Cau hinh wireless 2.4
-	elif [ "$key" = "wireless.radio2G.enable" ];then
-		echo 1 >/tmp/network_flag
-		uci set wireless.radio0.disabled="$value"
-		echo $value
-	elif [ "$key" = "wireless.radio2G.channel" ];then
-		uci set wireless.radio0.channel="$value"
-	elif [ "$key" = "wireless.radio2G.htmode" ];then
-		value=$(echo $value | tr a-z A-Z)
-		uci set wireless.radio0.htmode="$value"
-	elif [ "$key" = "wireless.radio2G.txpower" ];then
-		uci set wireless.radio0.txpower="$value"
-	elif [ "$key" = "wireless.ssid2G" ];then
-		uci set wireless.default_radio0.ssid="$value"
-	elif [ "$key" = "wireless.passwd2G" ];then
-		if [ "$value" = "" ];then
-			uci set wireless.default_radio0.key=""
-			uci set wireless.default_radio0.encryption="none"
-		else
-			uci set wireless.default_radio0.key="$value"
-			uci set wireless.default_radio0.encryption="psk2"
-		fi
-	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc2G" ];then
-			uci set wireless.default_radio0.rsn_preauth="$value"
-			uci delete wireless.default_radio0.ieee80211r >/dev/null 2>&1
-			uci delete wireless.default_radio0.ft_over_ds >/dev/null 2>&1
-			uci delete wireless.default_radio0.ft_psk_generate_local >/dev/null 2>&1
-	#Chuyen dung 802.1R	
-	elif [ "$key" = "wireless.ft2G" ];then
-		if [ "$value" =  "1" ];then
-			uci delete wireless.default_radio0.rsn_preauth >/dev/null 2>&1
-			uci set wireless.default_radio0.ieee80211r="1"
-			uci set wireless.default_radio0.ft_over_ds="1"
-			uci set wireless.default_radio0.ft_psk_generate_local="1"
-		fi	
-	##Map SSID to net/plain LAN or WAN	
-	elif [ "$key" = "wireless.network2G" ];then
-		uci set wireless.default_radio0.network="$value"
-	#Set Max Client	
-	elif [ "$key" = "wireless.maxclients2G" ];then
-		uci set wireless.default_radio0.maxassoc="$value"
-	##Cau hinh switch 5 port		
-	elif [ "$key" = "network.switch" ];then
-		echo 1 >/tmp/network_flag
-		uci set wireless.@wifi-iface[0].network="wan"
-		uci set wifimedia.@switchmode[0].switch_port="$value"		
-		if [ "$value" = "1" ];then
-			uci delete network.lan >/dev/null 2>&1
-			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0.1 eth0.2"
-		else
-			uci set network.lan="interface"
-			uci set network.lan.proto="static"
-			uci set network.lan.ipaddr="192.168.5.1"
-			uci set network.lan.netmask="255.255.255.0"
-			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth0.1"
-			uci set dhcp.lan.force="1"
-			uci set dhcp.lan.netmask="255.255.255.0"
-			uci del dhcp.lan.dhcp_option
-			uci add_list dhcp.lan.dhcp_option="6,8.8.8.8,8.8.4.4"				
-			uci set network.wan.ifname="eth0.2"
-		fi
-	#Cu hinh IP LAN
-	elif [ "$key" = "network.lan.static" ];then
-		echo 1 >/tmp/network_flag
-		uci delete network.lan >/dev/null 2>&1
-		uci set network.lan="interface"
-		uci set network.lan.type="bridge"	
-		uci set network.lan.ifname="eth0.1"
-		if [ "$value" = "1" ];then ##Static 
-			uci set network.lan.proto="static"	
-		else ##DHCP Client nhan IP
-			uci set network.lan.proto="dhcp"	
-		fi
-	elif [  "$key" = "network.lan.ip" ];then
-		uci set network.lan.ipaddr="$value"
-	elif [  "$key" = "network.lan.subnetmask" ];then
-		uci set network.lan.netmask="$value"
-	elif [  "$key" = "network.lan.gateway" ];then
-		uci set network.lan.gateway="$value"		
-	elif [  "$key" = "network.lan.dns" ];then
-		value=$(echo $value | sed 's/,/ /g')
-		uci set network.lan.dns="$value"		
-	###WAN config
-	elif [ "$key" = "network.wan.static" ];then
-		echo 1 >/tmp/network_flag
-		uci delete network.wan >/dev/null 2>&1
-		uci set network.wan="interface"
-		uci set network.wan.type="bridge"	
-		uci set network.wan.ifname="eth0.2"				
-		if [ "$value" = "1" ];then ##Static 
-			uci set network.wan.proto="static"
-		else ##DHCP Client nhan IP
-			uci set network.wan.proto="dhcp"	
-		fi
-	elif [  "$key" = "network.wan.ip" ];then
-		uci set network.wan.ipaddr="$value"
-	elif [  "$key" = "network.wan.subnetmask" ];then
-		uci set network.wan.netmask="$value"
-	elif [  "$key" = "network.wan.gateway" ];then
-		uci set network.wan.gateway="$value"		
-	elif [  "$key" = "network.wan.dns" ];then
-		value=$(echo $value | sed 's/,/ /g')
-		uci set network.wan.dns="$value"		
-	##Cau hinh DHCP
-	elif [  "$key" = "network.dhcp.start" ];then
-		uci set dhcp.lan.start="$value"
-	elif [  "$key" = "network.dhcp.limit" ];then
-		uci set dhcp.lan.limit="$value"
-	elif [  "$key" = "network.dhcp.leasetime" ];then
-		uci set dhcp.network.leasetime="$value"
-	elif [  "$key" = "detectclient.uri" ];then
-		uci set wifimedia.@heartbeat[0].uri="$value"
-	elif [  "$key" = "heartbeat.uri" ];then
-		uci set wifimedia.@heartbeat[0].heartbeat_uri="$value"			
-	#Cau hinh Captive Portal
-	#elif [  "$key" = "cpn.enable" ];then
-	#	echo $value >/tmp/cpn_flag
-	#	uci set nodogsplash.@nodogsplash[0].enabled="$value"
-	#	uci set wifimedia.@nodogsplash[0].enable_cpn="$value"
-	#	uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-lan"
-	#	uci set wifimedia.@nodogsplash[0].network="lan"		
-	#elif [  "$key" = "cpn.domain" ];then
-	#	uci set wifimedia.@nodogsplash[0].domain="$value"
-	#elif [  "$key" = "cpn.walledgarden" ];then
-	#	value=$(echo $value | sed 's/,/ /g')
-	#	uci set wifimedia.@nodogsplash[0].preauthenticated_users="$value"
-	#Network
-	#elif [  "$key" = "cpn.network" ];then
-	# uci set wifimedia.@nodogsplash[0].network="$value"		
-	#elif [  "$key" = "cpn.fb" ];then
-	#	uci set wifimedia.@nodogsplash[0].facebook="$value"
-	#elif [  "$key" = "cpn.dhcpextenal" ];then
-	#	uci set wifimedia.@nodogsplash[0].dhcpextension="$value"
-	#	uci commit
-	#	/sbin/wifimedia/captive_portal.sh dhcp_extension
-	#Cau hinh auto reboot
-	elif [  "$key" = "scheduletask.enable" ];then
-		echo $value >/tmp/scheduled_flag
-	elif [  "$key" = "scheduletask.hours" ];then
-		uci set scheduled.@times[0].hour="$value"
-	elif [  "$key" = "scheduletask.minute" ];then
-		uci set scheduled.@times[0].minute="$value"
-	elif [ "$key" =  "network.diagnostics" ]; then
-		value=$(echo $value | sed 's/,/ /g')
-		echo $value >$diag_file		
-	fi
-##
-done	
-uci commit
-#
-#if [ $(cat /tmp/cpn_flag) -eq 1 ]; then
-#	echo "Config & Start Captive Portal"
-#	/sbin/wifimedia/captive_portal.sh config_captive_portal
-#	/etc/init.d/nodogsplash enable
-#	echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds
-#	/etc/init.d/cron restart
-#	rm /tmp/cpn_flag
-#else
-#  echo "Stop Captive Portal"
-#  /etc/init.d/nodogsplash disable
-#  echo ''>/etc/crontabs/nds
-#  /etc/init.d/firewall restart
-#  /etc/init.d/cron restart
-  #service firewall restart
-#fi
-
-if [ $(cat /tmp/network_flag) -eq 1 ]; then
-	wifi down && wifi up
-	/etc/init.d/network restart
-	rm /tmp/network_flag
-	echo "WIFI Online"
-fi
-
-if [ $(cat /tmp/reboot_flag) -eq 1 ]; then
-	echo "restarting the node"
-	 sleep 5 && reboot
-fi	
-}
-
 _boot(){
 	checking
 	action_lan_wlan
@@ -372,33 +434,6 @@ _nds(){ #Status Captive Portal
 	fi
 }
 
-srv(){
-	token
-	monitor_port
-	heartbeat
-	ip_public
-	_nds
-	diagnostics
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics_resulte}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}&captive_portal=${_cpn}&hardware=${model_hardware}" "$link_config$_device" -O $response_file
-
-	curl_result=$?
-	curl_data=$(cat $response_file)
-	if [ "$curl_result" -eq "0" ]; then
-		echo "Checked in to the dashboard successfully,"
-	
-		if grep -q "." $response_file; then
-			echo "we have new settings to apply!"
-		else
-			echo "we will maintain the existing settings."
-			exit
-		fi	
-	else
-		logger "WARNING: Could not checkin to the dashboard."
-		echo "WARNING: Could not checkin to the dashboard."
-		exit
-	fi
-	start_cfg	
-}
 token(){
 	#token = sha256(mac+secret)
 	secret="(C)WifiMedia2019"
