@@ -38,6 +38,7 @@ fi
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 mac_wlan=$(cat /sys/class/ieee80211/phy0/macaddress | sed 's/://g')
 echo "127.0.0.1 localhost" > /etc/hosts
+nslookup monitor.wifimedia.vn | grep 'Address'|grep -v '127\.0\.0\.1' |awk '{print $3 echo " monitor.wifimedia.vn"}'  >>/etc/hosts
 echo "${ip_dhcp} $mac_wlan.wifimedia.vn" >> /etc/hosts
 echo "$ip_gateway local.wifimedia.vn" >> /etc/hosts
 /sbin/wifimedia/controller.sh license_srv
