@@ -41,7 +41,8 @@ config_captive_portal() {
 		/etc/init.d/firewall restart
 		exit;
 	else	
-
+		###Stop Service NDS and config
+		/etc/init.d/nodogsplash stop
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
 		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-$networkncpn";	
 		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
@@ -125,7 +126,6 @@ config_captive_portal() {
 		rm -f $PREAUTHENTICATED_ADDRS $PREAUTHENTICATED_ADDR_FB
 		dhcp_extension
 		wifi
-		/etc/init.d/nodogsplash stop
 		sleep 5
 		/etc/init.d/nodogsplash start
 	fi
