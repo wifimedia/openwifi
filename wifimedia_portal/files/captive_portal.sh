@@ -14,6 +14,7 @@ domain_default=${domain:-portal.nextify.vn/splash}
 #redirecturl=`uci -q get wifimedia.@nodogsplash[0].redirecturl`
 #redirecturl_default=${redirecturl:-https://google.com.vn}
 preauthenticated_users=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users` #Walled Gardent
+iplist=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users_ip | sed 's/,/ /g'`
 maxclients=`uci -q get wifimedia.@nodogsplash[0].maxclients`
 maxclients_default=${maxclients:-250}
 preauthidletimeout=`uci -q get wifimedia.@nodogsplash[0].preauthidletimeout`
@@ -40,8 +41,9 @@ config_captive_portal() {
 		/etc/init.d/nodogsplash stop
 		/etc/init.d/firewall restart
 		exit;
-	else	
-
+	else
+		#stop service
+		/etc/init.d/nodogsplash stop
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
 		uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-$networkncpn";	
 		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
@@ -84,6 +86,9 @@ config_captive_portal() {
 		uci commit
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw" >/dev/null 2>&1
+		for ip in $iplist; do ##Add Walled Gardent IPs
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip" >/dev/null 2>&1
+		done		
 		if [ -z "$inf" ];then #neu khong co int thi
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
 			uci set wifimedia.@nodogsplash[0].network="hotspot"
@@ -118,7 +123,6 @@ config_captive_portal() {
 		rm -f $PREAUTHENTICATED_ADDRS $PREAUTHENTICATED_ADDR_FB
 		dhcp_extension
 		wifi
-		/etc/init.d/nodogsplash stop
 		sleep 5
 		/etc/init.d/nodogsplash start
 	fi
