@@ -32,6 +32,7 @@ url = s:taboption( "basic",Value, "domain","Captive portal url","portal.nextify.
 
 --s:taboption( "basic",Value, "redirecturl","Redirect URL","https://google.com.vn")
 pre = s:taboption( "basic",Value, "preauthenticated_users","Walled Garden","google.com.vn, vnexpress.net")
+s:taboption( "basic",Value, "preauthenticated_users_ip","Walled Garden IP","10.10.1.2, 10.10.3.5")
 --pre:depends({enable_cpn="1"})
 mac = s:taboption( "advance",Value, "maxclients","Maxclients","Max Clients:250")
 mac:depends({enable_cpn="1"})
