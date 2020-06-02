@@ -46,6 +46,6 @@ define Package/wifimedia_portal/install
 	$(INSTALL_BIN) ./files/captive_portal.sh $(1)/sbin/wifimedia/captive_portal.sh
 	$(INSTALL_DATA) ./files/wifimedia_portal.lua $(1)/usr/lib/lua/luci/controller/wifimedia/wifimedia_portal.lua
 	$(INSTALL_DATA) ./files/portal_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/wifimedia_portal.lua
-	$(INSTALL_BIN) ./files/nodogsplash-v4.0.1 $(1)/etc/init.d/nodogsplash
+	$(INSTALL_BIN) ./files/nodogsplash-v4.3.3 $(1)/etc/init.d/nodogsplash
 endef
 $(eval $(call BuildPackage,wifimedia_portal))
