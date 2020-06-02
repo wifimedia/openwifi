@@ -12,6 +12,7 @@ domain_default=${domain:-portal.nextify.vn/splash}
 #redirecturl=`uci -q get wifimedia.@nodogsplash[0].redirecturl`
 #redirecturl_default=${redirecturl:-https://google.com.vn}
 preauthenticated_users=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users` #Walled Gardent
+iplist=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users_ip | sed 's/,/ /g'`
 maxclients=`uci -q get wifimedia.@nodogsplash[0].maxclients`
 maxclients_default=${maxclients:-250}
 preauthidletimeout=`uci -q get wifimedia.@nodogsplash[0].preauthidletimeout`
@@ -39,7 +40,8 @@ config_captive_portal() {
 		/etc/init.d/firewall restart
 		exit;
 	else	
-
+		#Stop service
+		/etc/init.d/nodogsplash stop
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
 		uci set nodogsplash.@nodogsplash[0].gatewayinterface="${NET_ID}";
 		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
@@ -79,8 +81,11 @@ config_captive_portal() {
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1" >/dev/null 2>&1
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1" >/dev/null 2>&1
-		uci commit
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
+		for ip in $iplist; do ##Add Walled Gardent IPs
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip" >/dev/null 2>&1
+		done
+		uci commit
 		if [ -z "$inf" ];then #neu khong co int thi
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw" >/dev/null 2>&1
 			uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-hotspot"
@@ -102,7 +107,7 @@ config_captive_portal() {
 
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 22"
 		#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
+		#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"	
 
