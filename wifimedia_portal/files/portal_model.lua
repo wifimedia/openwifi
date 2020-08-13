@@ -55,7 +55,7 @@ dhcpextension:depends({enable_cpn="1"})
 function service.write(self, section, value)
 if value == self.enabled then
 		luci.sys.call("uci set nodogsplash.@nodogsplash[0].enabled='1' && uci commit nodogsplash")
-		luci.util.exec("echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds && /etc/init.d/cron restart")
+		--luci.util.exec("echo '*/10 * * * * /sbin/wifimedia/captive_portal.sh _nextify_service'>/etc/crontabs/nds && /etc/init.d/cron restart")
 		luci.util.exec("/etc/init.d/nodogsplash enable")
 	else
 		luci.sys.exec("uci set nodogsplash.@nodogsplash[0].enabled='0' && uci commit nodogsplash")
