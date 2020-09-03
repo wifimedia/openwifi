@@ -157,35 +157,35 @@ captive_portal_restart(){
 	fi
 }
 
-_nextify_service(){
-
-    domain_nextify=`echo $domain_default | cut -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17`
-	flag_dns=/tmp/nextify_dns		 
-	wget -q --timeout=3 \
-		"http://api.nextify.co/check_portal?site=$domain_nextify" -O $flag_dns
-	if [ $? -eq "0" ];then
-		_flag=`cat $flag_dns`
-		if [ $_flag -eq 1 ];then
-			#dich vu nextify dang chay
-			ndsctl status > /tmp/ndsctl_status.txt
-			if [ $? -eq 0 ]; then
-				#nodogsplash dang chay
-				exit;
-			else
-				#nodogsplash khong chay thi start lai
-				uci set nodogsplash.@nodogsplash[0].enabled='1'
-				uci set wifimedia.@nodogsplash[0].enable_cpn='1'
-				uci commit
-				/etc/init.d/nodogsplash start
-			fi
-		else
-		#dich vu next bi tat thi cho tat luon chuong trinh nodogsplash
-		_disable_captive
-		fi
-	else
-		_disable_captive	
-	fi
-}
+#_nextify_service(){
+#
+#    domain_nextify=`echo $domain_default | cut -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17`
+#	flag_dns=/tmp/nextify_dns		 
+#	wget -q --timeout=3 \
+#		"http://api.nextify.co/check_portal?site=$domain_nextify" -O $flag_dns
+#	if [ $? -eq "0" ];then
+#		_flag=`cat $flag_dns`
+#		if [ $_flag -eq 1 ];then
+#			#dich vu nextify dang chay
+#			ndsctl status > /tmp/ndsctl_status.txt
+#			if [ $? -eq 0 ]; then
+#				#nodogsplash dang chay
+#				exit;
+#			else
+#				#nodogsplash khong chay thi start lai
+#				uci set nodogsplash.@nodogsplash[0].enabled='1'
+#				uci set wifimedia.@nodogsplash[0].enable_cpn='1'
+#				uci commit
+#				/etc/init.d/nodogsplash start
+#			fi
+#		else
+#		#dich vu next bi tat thi cho tat luon chuong trinh nodogsplash
+#		_disable_captive
+#		fi
+#	else
+#		_disable_captive	
+#	fi
+#}
 
 _disable_captive() {
 	nds_enable=$(uci get nodogsplash.@nodogsplash[0].enabled)
