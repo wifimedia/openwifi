@@ -6,3 +6,4 @@ src-git telephony https://git.openwrt.org/feed/telephony.git;openwrt-19.07
 #src-git luci https://github.com/wifimedia/luci18x.git;luci-v1
 src-git luci https://github.com/wifimedia/openwrt_luci_19.07.git;luci19x
 src-git wifimedia https://github.com/wifimedia/lede_wifimedia.git;vnpost
+-
