@@ -79,10 +79,10 @@ if [ "$model_hardware" == "TL-WA901ND_v4" ] || [ "$model_hardware" == "CF-E355AC
 
 	uci batch <<-EOF
 		set wireless.default_radio0.maxassoc=30
-		set wireless.@wifi-iface[0].ssid=WIFIMEDIA.VN
+		set wireless.@wifi-iface[0].ssid=Au Lac Apartment
 		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		#set wireless.@wifi-iface[0].encryption="psk2"
-		#set wireless.@wifi-iface[0].key="loopposA@"
+		set wireless.@wifi-iface[0].encryption="psk2"
+		set wireless.@wifi-iface[0].key="Hoang@123"
 		set wireless.radio0.disabled=0
 		set wireless.radio0.channel=11
 		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
