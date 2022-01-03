@@ -79,6 +79,7 @@ if [ "$model_hardware" == "TL-WA901ND_v4" ] || [ "$model_hardware" == "CF-E355AC
 
 	uci batch <<-EOF
 		set wireless.default_radio0.maxassoc=30
+		set wireless.@wifi-iface[0].network="wan"
 		set wireless.@wifi-iface[0].ssid="Au Lac Apartment"
 		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
 		set wireless.@wifi-iface[0].encryption="psk2"
