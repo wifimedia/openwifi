@@ -30,11 +30,11 @@ ip_dhcp=$(ifconfig br-wan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }'
 ip_gateway=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }')
 net_wan=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }' | cut -c 1-9).0
 net_lan=$(route -n | grep 'U' | grep 'br-lan' | awk '{ print $1 }')
-if [ $net_wan == $net_lan ];then
-	uci set network.lan.ipaddr=$ip_lan
-	uci commit network
-	/etc/init.d/network restart
-fi
+#if [ $net_wan == $net_lan ];then
+#	uci set network.lan.ipaddr=$ip_lan
+#	uci commit network
+#	/etc/init.d/network restart
+#fi
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 mac_wlan=$(cat /sys/class/ieee80211/phy0/macaddress | sed 's/://g')
 echo "127.0.0.1 localhost" > /etc/hosts
