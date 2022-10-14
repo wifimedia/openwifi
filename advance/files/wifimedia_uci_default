@@ -117,6 +117,7 @@ if  [ "$model_hardware" == "TL-WR940N_v6" ] ;then
 		set wireless.@wifi-iface[1].mode='sta'
 		set wireless.@wifi-iface[1].network='wwan'
 		set wireless.@wifi-iface[1].bssid='F0:9C:E9:F0:0C:94'
+		set firewall.@zone[1].network='wan wwan'
 		commit wireless
 	EOF
 
@@ -135,6 +136,35 @@ uci batch <<-EOF
 	set firewall.@zone[1].input="ACCEPT"
 	commit firewall
 	EOF
+#NET_ID="wan wwan"
+#FW_ZONE="hotspot"
+#IFNAME="eth0.300" #VLAN1
+#uci batch << EOF
+	set firewall.${FW_ZONE}=zone
+	set firewall.${FW_ZONE}.name=${FW_ZONE}
+	set firewall.${FW_ZONE}.network=${NET_ID}
+	set firewall.${FW_ZONE}.forward=ACCEPT
+	set firewall.${FW_ZONE}.output=ACCEPT
+	set firewall.${FW_ZONE}.input=ACCEPT 
+	set firewall.${FW_ZONE}_fwd=forwarding
+	set firewall.${FW_ZONE}_fwd.src=${FW_ZONE}
+	set firewall.${FW_ZONE}_fwd.dest=wan
+	set firewall.${FW_ZONE}_dhcp=rule
+	set firewall.${FW_ZONE}_dhcp.name=${FW_ZONE}_DHCP
+	set firewall.${FW_ZONE}_dhcp.src=${FW_ZONE}
+	set firewall.${FW_ZONE}_dhcp.target=ACCEPT
+	set firewall.${FW_ZONE}_dhcp.proto=udp
+	set firewall.${FW_ZONE}_dhcp.dest_port=67-68
+	set firewall.${FW_ZONE}_dns=rule
+	set firewall.${FW_ZONE}_dns.name=${FW_ZONE}_DNS
+	set firewall.${FW_ZONE}_dns.src=${FW_ZONE}
+	set firewall.${FW_ZONE}_dns.target=ACCEPT
+	set firewall.${FW_ZONE}_dns.proto=tcpudp
+	set firewall.${FW_ZONE}_dns.dest_port=53
+	commit firewall
+	commit network
+	commit dhcp
+#EOF
 		
 #Password	
 echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
