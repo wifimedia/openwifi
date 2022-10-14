@@ -153,12 +153,13 @@ cat $response_file | while read line ; do
 			uci set network.lan.proto="static"
 			uci set network.lan.ipaddr="192.168.173.225"
 			uci set network.lan.netmask="255.255.255.248"
+			uci set network.lan.gateway="192.168.173.1"
 			uci set network.lan.type="bridge"
 			uci set network.lan.ifname="eth1.1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.248"
 			uci del dhcp.lan.dhcp_option
-			uci add_list dhcp.lan.dhcp_option="6,192.168.173.199,192.168.177.199"				
+			#uci add_list dhcp.lan.dhcp_option="6,192.168.173.199,192.168.177.199"				
 			uci set network.wan.ifname="eth0"
 		fi
 	#Cu hinh IP LAN
