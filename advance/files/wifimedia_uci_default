@@ -109,6 +109,7 @@ if  [ "$model_hardware" == "TL-WR940N_v6" ] ;then
 		set wireless.default_radio0.encryption='none'
 		set wireless.default_radio0.maxassoc='30'
 		set wireless.default_radio0.ssid='WIFIVSTV.VN'
+		add wireless wifi-iface
 		set wireless.@wifi-iface[1]=wifi-iface
 		set wireless.@wifi-iface[1].ssid='VSTV_Wireless'
 		set wireless.@wifi-iface[1].encryption='none'
